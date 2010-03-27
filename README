@@ -1,0 +1,90 @@
+swk - the static widget toolkit
+================================
+swk is a dynamic widget toolkit that provides the ability to create
+keyboard-driven textual UIs very quickly on top of supported(*) window systems
+
+Historically the swk domain is covered by (n)curses based applications that run
+completely in text mode. But this approach has numerous disadvatages, such as
+archaic cursor handling, slow screen redraws, limitations through the use of
+just text and characters, different behaviour in different terminal modes, and
+so on.
+
+On the other hand full-featured UI toolkits like GTK or Qt are far too complex
+and bloated to be anywhere close for rapid and effecient development, or to be
+actually portable onto devices with limited memory and processing power.
+
+Design
+------
+We believe lesser choice is better.
+
+swk has a very basic set of widgets, particularly only widgets with few
+properties and function pointers to extend and override the behaviour and
+appearance of such widgets. The overall widget structure is a tree of widgets,
+where the root of the tree represents the lower-most widget which
+contains all other widgets; and where all leafs represent the
+top-most widgets.
+
+Each widget is parent relative and swk scales child widgets by maximising them
+into the available space of the surrounding parent widget, unless a child
+widget has no width or height factor specified.
+
+The layout algorithm fills child widgets horizontally until a break is inserted
+that creates a new row.  The swk layout algorithm does *not* support the use of
+absolute x/y offsets or fixed width/height in order to guarantuee seamless
+scaling, this is an advantage and increases the usability and look'n'feel of
+swk user interfaces.
+
+The width/height of a widget is defined as float factor in between 0.0 and 1.0
+that is used for scaling it in a parent relative way.  The sum of all widgets
+in a row until a break should not exceed 1.0, the sum of the widget with the
+greatest height in each row should not exceed 1.0 either in order that the
+layout algorithm creates useful results. If the sum is greater than 1.0 or
+negative swk will ignore all width/height factors until the developer has fixed
+his mistake.
+
+typedef void *        SwkBitmap;
+typedef SwkWidget *   SwkBreak;
+typedef unsigned long SwkColor;
+typedef char *        SwkText;
+
+typedef struct {
+	SwkText *name;
+} SwkFont;
+
+typedef struct {
+	SwkColor  bg;
+	SwkColor  text;
+	SwkColor  border;
+	SwkFont  *font;
+} SwkGC;
+
+typedef struct _SwkWidget SwkWidget;
+struct _SwkWidget {
+	float       w_factor;
+	float       h_factor;
+	SwkGC       gc
+	SwkText    *text
+	SwkWidget  *parent
+	SwkWidget **childs
+	SwkBitmap *(*draw)(Widget *w, void *userdata, SwkBitmap *current, unsigned int current_w, unsigned int current_h);
+	void       (*click)(Widget *w, void *userdata, unsigned int current_w, unsigned int current_h, int x, int y);
+	void       (*keypress)(Widget *w, void *userdata, int keycode);
+	void       (*focusin)(Widget *w, void *userdata);
+	void       (*focusout)(Widget *w, void *userdata);
+};
+
+The content of each widget is a Bitmap, which is a platform dependent
+representation of the actual content of the widget using in its current size.
+
+If you overload the draw function of a widget, it is expected that you return a
+Bitmap covering the current actual size of the widget.
+
+There are also a bunch of swk manipulation functions that help you implementing
+custom draw functions:
+
+void swk_copy_bitmap(Bitmap *target, Bitmap *source, int target_x, int target_y, int source_x, int source_y, uint source_w, uint source_h);
+void swk_draw_text(Bitmap *target, int offset_x, int offset_y, Text *text);
+
+Remarks
+-------
+(*) Currently we the X Window System is the only supported environment.
