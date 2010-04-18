@@ -1,51 +1,56 @@
-#define TRUE 1
-#define FALSE 0
-typedef int bool_t;
+typedef enum { EVoid, EClick, EMotion, EKey, EExpose, ELast } SwkEventType;
 
-typedef struct swk_widget_t {
-	int (*render) (struct swk_widget_t *widget, int w, int h);
-	int (*activate) (struct swk_widget_t *widget, int type);
-	void *user;
-} SwkWidget;
+typedef struct SwkBox SwkBox;
 
-typedef struct container_t {
-	char *title; // nullable
-	int show; // boolean
-	struct SwkWidget *widget;
-	struct SwkBox *next;
-} SwkBox;
+typedef struct {
+	int x;
+	int y;
+} Point;
 
-typedef struct swk_window_t {
-	char *title;
-	SwkWidget *selected;
+typedef struct {
+	int x;
+	int y;
+	int w;
+	int h;
+} Rect;
+
+typedef struct {
+	int button;
+	long modmask;
+	Point point;
+} Click;
+
+typedef struct {
+	int keycode;
+	long modmask;
+} Key;
+
+typedef struct {
+	SwkEventType type;
 	SwkBox *box;
+	union {
+		Click click;
+		Point motion;
+		Key key;
+		Rect expose;
+	} data;
+} SwkEvent; 
+
+void (*SwkEventCallback)(SwkEvent *e);
+
+struct SwkBox {
+	Rect r;
+	SwkEventCallback *e;
+	void *data;
+};
+
+typedef struct {
+	Rect r;
 	SwkBox *boxes;
-	int (*box_align) (struct swk_window_t *window);
-	struct swk_window_t *next;
 } SwkWindow;
 
-typedef struct scene_t {
-	SwkWindow *windows;
-	SwkWindow *window;
-} SwkScene;
 
-typedef enum {
-	CLICK,
-	RELEASE,
-	MOUSE_OVER,
-	MOUSE_OUT,
-} SwkEvent;
+void swk_init();
 
-int swk_widget_set_event_mask (SwkWidget *w, int evmask);
 
-int swk_scene_next (SwkScene *s, int dir);
-int swk_event ();
-
-void flow_layout_align (SwkScene *scene);
-
-extern SwkScene swkscene;
-extern int swkret;
-
-// uhm? not here maybe
-extern int swk_window_layout_flow (SwkWindow *window);
-extern int swk_box_layout_flow (SwkBox* box);
+void swk_deinit();
