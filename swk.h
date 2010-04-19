@@ -41,22 +41,22 @@ void (*SwkEventCallback)(SwkEvent *e);
 struct SwkBox {
 	Rect r;
 	SwkEventCallback *e;
-	union {
-		char *text;
-		void *aux;
-	} data;
+	char *text;
+	void *data;
 };
 
 typedef struct {
 	Rect r;
 	SwkBox *boxes;
+	char *title;
 } SwkWindow;
 
 
 void swk_init();
+void swk_deinit();
+int swk_loop(SwkWindow *w);
+int swk_event(SwkWindow *w);
 
 void swk_button(SwkEvent *e);
 void swk_label(SwkEvent *e);
-void swk_text(SwkEvent *e);
-
-void swk_deinit();
+void swk_entry(SwkEvent *e);
