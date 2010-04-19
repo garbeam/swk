@@ -22,16 +22,6 @@ swk_fit() {
 }
 
 void
-swk_loop() {
-	SwkEvent *e;
-	do {
-		if ((e = swk_event(1)))
-			swk_event_handle(e);
-	} while (!e || e->type != EQuit);
-	swk_exit();
-}
-
-void
 swk_event_handle(SwkEvent *e) {
 	switch(e->type) {
 	case EKey:

@@ -21,15 +21,12 @@ swk_gi_exit() {
 static char sdlkeys[256] = { 0 }; // TODO
 
 SwkEvent *
-swk_event(int lock) {
-	int evret;
+swk_event() {
 	SDL_Event event;
 	static SwkEvent ev;
 	SwkEvent *ret = NULL;
 
-	if (lock) evret = SDL_WaitEvent(&event);
-	else evret = SDL_PollEvent(&event);
-	if (evret) {
+	if(SDL_PollEvent(&event)) {
 		switch (event.type) {
 		case SDL_KEYDOWN:
 			ret = &ev;
@@ -45,11 +42,6 @@ swk_event(int lock) {
 			if(event.key.keysym.mod & KMOD_LMETA ||
 			   event.key.keysym.mod & KMOD_RMETA)
 				ev.data.key.modmask |= Meta;
-			break;
-		case SDL_MOUSEBUTTONDOWN:
-			ret = &ev;
-			ev.type = EClick;
-			//ev.data.click.button = 
 			break;
 		case SDL_QUIT:
 			ev.type = ev.type = EQuit;

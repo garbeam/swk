@@ -11,6 +11,7 @@ static SwkBox helloworld[] = {
 
 int
 main() {
+	SwkEvent *e;
 	SwkWindow w = {
 		.title="Hello World",
 		.boxes=helloworld
@@ -18,6 +19,10 @@ main() {
 
 	if (!swk_init(&w))
 		return 1;
-	swk_loop();
+	do {
+		if ((e = swk_event()))
+			swk_event_handle(e);
+	} while (!e || e->type != EQuit);
+	swk_exit();
 	return 0;
 }

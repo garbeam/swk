@@ -63,7 +63,7 @@ typedef struct {
 int swk_init(SwkWindow *w);
 void swk_exit();
 void swk_fit();
-SwkEvent * swk_event(int lock);
+SwkEvent * swk_event();
 void swk_event_handle(SwkEvent *e);
 
 void swk_focus_next();
