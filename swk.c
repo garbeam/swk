@@ -106,6 +106,9 @@ swk_button(SwkEvent *e) {
 	case EExpose:
 		// TODO: use box position
 		swk_gi_rect(0, 0, 10, 10);
+		break;
+	default:
+		break;
 	}
 }
 

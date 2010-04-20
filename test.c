@@ -3,13 +3,13 @@
 
 static int count = 3;
 
-static int mybutton(SwkEvent *e) {
+static void mybutton(SwkEvent *e) {
 	if (e->type == EClick) {
 		fprintf(stderr, "Button clicked %d\n", count);
 		if (count-- == 0)
 			swk_exit();
 	}
-	return swk_button(e);
+	swk_button(e);
 }
 
 static SwkBox helloworld[] = {
