@@ -18,10 +18,8 @@ swk_gi_init(SwkWindow *w) {
 
 int
 swk_gi_update(SwkWindow *w) {
-	/* nothing to do here */
 	SDL_SetVideoMode(screen->w, screen->h, 32, SDL_DOUBLEBUF|SDL_RESIZABLE);
 	screen = SDL_GetVideoSurface();
-	fprintf(stderr, "NEW(%d,%d)\n", screen->w, screen->h);
 	return 1;
 }
 
@@ -29,8 +27,6 @@ void
 swk_gi_exit() {
 	SDL_Quit();
 }
-
-static char sdlkeys[256] = { 0 }; // TODO
 
 SwkEvent *
 swk_gi_event(int dowait) {
@@ -73,7 +69,7 @@ swk_gi_event(int dowait) {
 	case SDL_KEYDOWN:
 		ret = &ev;
 		ev.type = EKey;
-		ev.data.key.keycode = sdlkeys[event.key.keysym.sym];
+		ev.data.key.keycode = event.key.keysym.unicode;
 		ev.data.key.modmask = 0;
 		if(event.key.keysym.mod & KMOD_LCTRL ||
 		   event.key.keysym.mod & KMOD_RCTRL)

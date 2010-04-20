@@ -102,6 +102,11 @@ swk_entry(SwkEvent *e) {
 
 void
 swk_button(SwkEvent *e) {
+	switch(e->type) {
+	case EExpose:
+		// TODO: use box position
+		swk_gi_rect(0, 0, 10, 10);
+	}
 }
 
 void
