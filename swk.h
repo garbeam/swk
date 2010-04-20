@@ -1,11 +1,8 @@
 /* See LICENSE file for copyright and license details. */
-#include "draw.h"
-
 #define SWK_NEWLINE .h=-1, .w=-1
 
 typedef enum { EVoid, EClick, EMotion, EKey, EExpose, EQuit, ELast } SwkEventType;
 typedef enum { Ctrl=1, Meta=2, Shift=4 } SwkKeyMod;
-typedef enum { Left=1, Middle=2, Right=3, WheelUp=4, WheelDown=5 } SwkClickButton;
 
 typedef struct SwkBox SwkBox;
 
@@ -22,14 +19,14 @@ typedef struct {
 } Rect;
 
 typedef struct {
-	SwkClickButton button;
-	long modmask;
+	int button;
+	int modmask;
 	Point point;
 } Click;
 
 typedef struct {
 	int keycode;
-	long modmask;
+	int modmask;
 } Key;
 
 typedef struct {
@@ -61,6 +58,7 @@ typedef struct {
 } SwkWindow;
 
 int swk_init(SwkWindow *w);
+int swk_gi_update(SwkWindow *w);
 void swk_exit();
 void swk_fit();
 SwkEvent * swk_event();
@@ -73,3 +71,16 @@ void swk_button(SwkEvent *e);
 void swk_label(SwkEvent *e);
 void swk_entry(SwkEvent *e);
 void swk_filler(SwkEvent *e);
+
+/* graphic backend */
+
+int swk_gi_init(SwkWindow *w);
+void swk_gi_exit();
+SwkEvent * swk_gi_event();
+
+void swk_gi_flip();
+
+void swk_gi_line(int x, int y, int w, int h);
+void swk_gi_box(int x, int y, int w, int h);
+void swk_gi_rect(int x, int y, int w, int h);
+void swk_gi_text(int x, int y, const char *text);

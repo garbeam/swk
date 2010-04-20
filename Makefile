@@ -8,7 +8,7 @@ LIBDIR?=${PREFIX}/lib
 GI?=sdl
 GI_LIBS=-lSDL
 
-GI_OBJS=gi_${GI}.o draw.o
+GI_OBJS=gi_${GI}.o
 
 all: static test
 

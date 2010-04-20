@@ -1,17 +1,27 @@
 #include <stdio.h>
 #include "swk.h"
 
+static int count = 3;
+
+static int mybutton(SwkEvent *e) {
+	if (e->type == EClick) {
+		fprintf(stderr, "Button clicked %d\n", count);
+		if (count-- == 0)
+			swk_exit();
+	}
+	return swk_button(e);
+}
+
 static SwkBox helloworld[] = {
 	{ .cb=swk_label, .text="Press this button", },
 	{ SWK_NEWLINE },
 	{ .cb=swk_filler, },
-	{ .cb=swk_button, .text="clickme" },
+	{ .cb=mybutton, .text="clickme" },
 	{ .cb=NULL }
 };
 
 int
 main() {
-	SwkEvent *e;
 	SwkWindow w = {
 		.title="Hello World",
 		.boxes=helloworld
@@ -19,10 +29,6 @@ main() {
 
 	if (!swk_init(&w))
 		return 1;
-	do {
-		if ((e = swk_event()))
-			swk_event_handle(e);
-	} while (!e || e->type != EQuit);
-	swk_exit();
+	swk_loop();
 	return 0;
 }
