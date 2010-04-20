@@ -67,21 +67,23 @@ swk_gi_event(int dowait) {
 		fprintf(stderr, "event: click %d\n", event.button.button);
 		break;
 	case SDL_KEYDOWN:
-		ret = &ev;
-		ev.type = EKey;
-		ev.data.key.keycode = event.key.keysym.unicode;
-		ev.data.key.modmask = 0;
-		if(event.key.keysym.mod & KMOD_LCTRL ||
-		   event.key.keysym.mod & KMOD_RCTRL)
-			ev.data.key.modmask |= Ctrl;
-		if(event.key.keysym.mod & KMOD_LSHIFT||
-		   event.key.keysym.mod & KMOD_RSHIFT)
-			ev.data.key.modmask |= Shift;
-		if(event.key.keysym.mod & KMOD_LMETA ||
-		   event.key.keysym.mod & KMOD_RMETA)
-			ev.data.key.modmask |= Meta;
-		fprintf(stderr, "event: key %d %d\n", 
-			ev.data.key.modmask, ev.data.key.keycode);
+		if (ev.data.key.keycode != 0 && event.key.keysym.unicode != 0) {
+			ret = &ev;
+			ev.type = EKey;
+			ev.data.key.keycode = event.key.keysym.unicode;
+			ev.data.key.modmask = 0;
+			if(event.key.keysym.mod & KMOD_LCTRL ||
+			   event.key.keysym.mod & KMOD_RCTRL)
+				ev.data.key.modmask |= Ctrl;
+			if(event.key.keysym.mod & KMOD_LSHIFT||
+			   event.key.keysym.mod & KMOD_RSHIFT)
+				ev.data.key.modmask |= Shift;
+			if(event.key.keysym.mod & KMOD_LMETA ||
+			   event.key.keysym.mod & KMOD_RMETA)
+				ev.data.key.modmask |= Meta;
+			fprintf(stderr, "event: key %d %d\n", 
+				ev.data.key.modmask, ev.data.key.keycode);
+		}
 		break;
 	case SDL_QUIT:
 		fprintf(stderr, "event: quit\n");

@@ -2,7 +2,7 @@
 #define SWK_NEWLINE .h=-1, .w=-1
 
 typedef enum { EVoid, EClick, EMotion, EKey, EExpose, EQuit, ELast } SwkEventType;
-typedef enum { Ctrl=1, Meta=2, Shift=4 } SwkKeyMod;
+typedef enum { Shift=1, Ctrl=2, Meta=4 } SwkKeyMod;
 
 typedef struct SwkBox SwkBox;
 
