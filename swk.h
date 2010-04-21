@@ -61,14 +61,12 @@ typedef struct {
 } SwkWindow;
 
 int swk_init(SwkWindow *w);
-int swk_gi_update(SwkWindow *w);
 void swk_update();
 void swk_exit();
 void swk_fit();
 void swk_loop();
 SwkEvent * swk_event();
 void swk_event_handle(SwkEvent *e);
-int swk_gi_has_event();
 
 void swk_focus_next();
 void swk_focus_prev();
@@ -83,7 +81,10 @@ void swk_filler(SwkEvent *e);
 int swk_gi_init(SwkWindow *w);
 void swk_gi_exit();
 SwkEvent * swk_gi_event();
+int swk_gi_update(SwkWindow *w);
+int swk_gi_has_event();
 
+void swk_gi_clear();
 void swk_gi_flip();
 
 void swk_gi_line(int x, int y, int w, int h, int color);

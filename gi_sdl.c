@@ -2,12 +2,11 @@
 #include <SDL/SDL_ttf.h>
 #include "swk.h"
 
-#define HICOLOR 0xa0,0x00,0x00
-#define FGCOLOR 0xa0,0xa0,0xa0
+#define HICOLOR 0x00,0x66,0xff
+#define FGCOLOR 0xff,0xff,0xff
 #define BGCOLOR 0x00,0x00,0x00
-#define TFCOLOR 0xff,0xff,0xff
+#define TFCOLOR 0xcc,0xcc,0xcc
 #define FONTNAME "Inconsolata.otf"
-//#define FONTSIZE 16
 #define FONTSIZE 14
 #define FS FONTSIZE
 #define BPP 32
@@ -63,7 +62,7 @@ swk_gi_init(SwkWindow *w) {
 	if (font == NULL) {
 		fprintf(stderr, "Cannot open font '%s'\n", FONTNAME);
 		return 0;
-	} //else TTF_SetFontStyle(font, TTF_STYLE_BOLD);
+	} else TTF_SetFontStyle(font, TTF_STYLE_BOLD);
 	return 1;
 }
 
@@ -98,9 +97,8 @@ swk_gi_event(int dowait) {
 	static SwkEvent ev;
 	SwkEvent *ret = NULL;
 
-	if(has_event) {
-		event = lastev;
-	} else has_event = SDL_WaitEvent(&event);
+	if(has_event) event = lastev;
+	else has_event = SDL_WaitEvent(&event);
 
 	if (has_event);
 	switch(event.type) {
@@ -197,10 +195,12 @@ swk_gi_rect(int x, int y, int w, int h, int color) {
 
 void
 swk_gi_text(int x, int y, const char *text) {
-	SDL_Surface *ts = TTF_RenderText_Solid(font, text, fontcolor);
-	if (ts) {
-		SDL_Rect to = { x*FS, y*FS, ts->w, ts->h };
-		SDL_BlitSurface(ts, NULL, screen, &to);
-		SDL_FreeSurface(ts);
-	} else fprintf(stderr, "Cannot render string (%s)\n", text);
+	if (*text) {
+		SDL_Surface *ts = TTF_RenderText_Solid(font, text, fontcolor);
+		if (ts) {
+			SDL_Rect to = { x*FS, y*FS, ts->w, ts->h };
+			SDL_BlitSurface(ts, NULL, screen, &to);
+			SDL_FreeSurface(ts);
+		} else fprintf(stderr, "Cannot render string (%s)\n", text);
+	}
 }
