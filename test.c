@@ -17,21 +17,21 @@ static void mybutton(SwkEvent *e) {
 
 
 static SwkBox helloworld[] = {
-	{ SWK_NEWLINE(1) },
+	SWK_BOX_NEWLINE(1),
 	{ .cb=swk_label, .text="Press a button", },
-	{ SWK_NEWLINE(2) },
+	SWK_BOX_NEWLINE(2),
 	{ .cb=swk_label, .text="Username:", },
 	{ .cb=swk_entry, .text="____", },
 	{ .cb=swk_filler, },
-	{ SWK_NEWLINE(1) },
+	SWK_BOX_NEWLINE(1),
 	{ .cb=swk_label, .text="Password:", },
 	{ .cb=swk_entry, .text="****", },
 	{ .cb=swk_filler, },
-	{ SWK_NEWLINE(2) },
+	SWK_BOX_NEWLINE(2),
 	{ .cb=mybutton, .text="yes" },
 	{ .cb=mybutton, .text="no" },
 	{ .cb=swk_filler, },
-	{ SWK_NEWLINE(5) },
+	SWK_BOX_NEWLINE(5),
 	{ .cb=swk_label, .text="--swktest", },
 	{ .cb=NULL }
 };
@@ -44,6 +44,6 @@ main() {
 	};
 	if (!swk_init(&w))
 		return 1;
-	swk_loop();
+	swk_loop(&w);
 	return 0;
 }

@@ -5,11 +5,10 @@
 #include "swk.h"
 
 static int running = 0;
-static SwkWindow *w = NULL;
 
 int
-swk_init(SwkWindow* window) {
-	w = window;
+swk_init(SwkWindow *w) {
+	w->_e.win = w;
 	w->box = w->boxes;
 	if(w->r.w == 0 || w->r.h == 0) {
 		w->r.w = 640;
@@ -17,41 +16,41 @@ swk_init(SwkWindow* window) {
 	}
 	if(swk_gi_init(w)) {
 		running = 1;
-		swk_update();
+		swk_update(w);
 	}
 	return running;
 }
 
 void
-swk_update() {
-	SwkEvent ev = { .type = EExpose };
+swk_update(SwkWindow *w) {
+	w->_e.type = EExpose;
 	if(swk_gi_update(w)) {
 		SwkBox *b = w->boxes;
-		swk_fit();
+		swk_fit(w);
 		swk_gi_clear();
 		for(;b->cb; b++) {
-			ev.box = b;
-			b->cb(&ev);
+			w->_e.box = b;
+			b->cb(&w->_e);
 		}
 		swk_gi_flip();
 	} else running = 0;
 }
 
 void
-swk_exit() {
+swk_exit(void) {
 	running = 0;
 }
 
 void
-swk_loop() {
+swk_loop(SwkWindow *w) {
 	SwkEvent *e;
 	do {
-		if((e = swk_event(1)))
-			swk_event_handle(e);
+		if((e = swk_next_event(w)))
+			swk_handle_event(e);
 	} while (!e || e->type != EQuit);
 }
 
-static void swk_fit_row(SwkBox *a, SwkBox *b, int y) {
+static void swk_fit_row(SwkWindow *w, SwkBox *a, SwkBox *b, int y) {
 	int count, x = 0;
 	SwkBox *btmp;
 	count = 0;
@@ -70,71 +69,76 @@ static void swk_fit_row(SwkBox *a, SwkBox *b, int y) {
 }
 
 void
-swk_fit() {
+swk_fit(SwkWindow *w) {
 	int y = 0;
 	SwkBox *b, *b2;
 	for(b=b2=w->boxes; b->cb; b++) {
 		if(b->r.w==-1 && b->r.h==-1) {
-			swk_fit_row(b2, b, y);
+			swk_fit_row(w, b2, b, y);
 			y += (int)(size_t)b->data;
 			b2 = b+1;
 		}
 	}
-	swk_fit_row(b2, b, y);
+	swk_fit_row(w, b2, b, y);
+}
+
+int
+swk_has_event(SwkWindow *w) {
+	return swk_gi_has_event(w);
 }
 
 SwkEvent *
-swk_event(int dowait) {
-	static SwkEvent ev;
+swk_next_event(SwkWindow *w) {
 	if(running)
-		return swk_gi_event();
-	ev.type = EQuit;
-	return &ev;
+		return swk_gi_event(w, 1);
+	w->_e.type = EQuit;
+	w->_e.win = w;
+	return &w->_e;
 }
 
 void
-swk_event_handle(SwkEvent *e) {
+swk_handle_event(SwkEvent *e) {
 	SwkBox *b;
 	switch(e->type) {
 	case EKey:
 		// TODO: handle ^Y and ^P to copypasta box->text
 		if(e->data.key.keycode == 9) { // TAB
 			if(e->data.key.modmask)
-				swk_focus_prev();
-			else swk_focus_next();
-			swk_update();
+				swk_focus_prev(e->win);
+			else swk_focus_next(e->win);
+			swk_update(e->win);
 		} else
 		if(e->data.key.keycode == 13) { // ENTER
-			e->box = w->box;
+			e->box = e->win->box;
 			e->type = EClick;
 		}
 		// send key to focused box
-		e->box = w->box;
-		if(w->box)
-			w->box->cb(e);
-		swk_update();
+		e->box = e->win->box;
+		if(e->win->box)
+			e->win->box->cb(e);
+		swk_update(e->win);
 		break;
 	case EMotion:
-		for(b=w->boxes; b->cb; b++) {
+		for(b=e->win->boxes; b->cb; b++) {
 			if(SWK_HIT(b->r, e->data.motion)) {
-				w->box = e->box = b;
+				e->win->box = e->box = b;
 				b->cb(e);
-				swk_update();
+				swk_update(e->win);
 				break;
 			}
 		}
 		break;
 	case EClick:
-		for(b=w->boxes; b->cb; b++) {
+		for(b=e->win->boxes; b->cb; b++) {
 			if(SWK_HIT(b->r, e->data.click.point)) {
-				e->box = w->box = b;
+				e->box = e->win->box = b;
 				e->box->cb(e);
-				swk_update();
+				swk_update(e->win);
 			}
 		}
 		break;
 	case EExpose:
-		swk_update();
+		swk_update(e->win);
 		break;
 	case EQuit:
 		swk_gi_exit();
@@ -145,7 +149,7 @@ swk_event_handle(SwkEvent *e) {
 }
 
 void
-swk_focus_next() {
+swk_focus_next(SwkWindow *w) {
 	w->box++;
 	if(w->box->cb == NULL)
 		w->box = w->boxes;
@@ -156,7 +160,7 @@ swk_focus_next() {
 }
 
 void
-swk_focus_prev() {
+swk_focus_prev(SwkWindow *w) {
 	if(w->box == w->boxes) {
 		while(w->box->cb)
 			w->box++;
@@ -167,7 +171,7 @@ swk_focus_prev() {
 			w->box--;
 			if(w->box < w->boxes) {
 				w->box = w->boxes;
-				swk_focus_prev();
+				swk_focus_prev(w);
 				return;
 			}
 		}
@@ -181,9 +185,9 @@ swk_label(SwkEvent *e) {
 	switch(e->type) {
 	case EExpose:
 		r = e->box->r;
-		if(w->box == e->box)
+		if(e->win->box == e->box)
 			swk_gi_line(r.x, r.y+1, r.w, 0, ColorHI);
-		swk_gi_text(r.x, r.y, e->box->text);
+		swk_gi_text(r, e->box->text);
 		break;
 	default:
 		break;
@@ -224,10 +228,10 @@ swk_button(SwkEvent *e) {
 	switch(e->type) {
 	case EExpose:
 		r = e->box->r;
-		if(w->box == e->box)
-			swk_gi_rect(r.x, r.y, r.w, r.h, ColorHI);
-		else swk_gi_rect(r.x, r.y, r.w, r.h, ColorFG);
-		swk_gi_text(r.x+1, r.y, e->box->text);
+		if(e->win->box == e->box)
+			swk_gi_rect(r, ColorHI);
+		else swk_gi_rect(r, ColorFG);
+		swk_gi_text(r, e->box->text);
 		break;
 	default:
 		break;

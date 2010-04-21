@@ -80,76 +80,71 @@ swk_gi_exit() {
 	SDL_Quit();
 }
 
-
+/* FIXME: put ugly statics into void *aux of SwkWindow */
 static int has_event = 0;
 static SDL_Event lastev = {.type=-1};
 
 int
-swk_gi_has_event() {
+swk_gi_has_event(SwkWindow *w) {
 	if (!has_event)
 		has_event = SDL_PollEvent(&lastev);
 	return has_event;
 }
 
 SwkEvent *
-swk_gi_event(int dowait) {
+swk_gi_event(SwkWindow *w, int dowait) {
 	SDL_Event event;
-	static SwkEvent ev;
-	SwkEvent *ret = NULL;
+	SwkEvent *ret = &w->_e;
 
 	if(has_event) event = lastev;
 	else has_event = SDL_WaitEvent(&event);
 
 	if (has_event);
 	switch(event.type) {
+	default: ret = NULL; break;
 	case SDL_VIDEORESIZE:
 		fprintf(stderr, "resize %d %d\n", event.resize.w, event.resize.h);
 		SDL_SetVideoMode(event.resize.w, event.resize.h,
 			32, SDL_DOUBLEBUF|SDL_RESIZABLE);
 	case SDL_VIDEOEXPOSE:
-		ret = &ev;
-		ev.type = EExpose;
-		ev.data.expose.x = ev.data.expose.y = \
-		ev.data.expose.w = ev.data.expose.h = 0;
+		ret->type = EExpose;
+		ret->data.expose.x = ret->data.expose.y = \
+		ret->data.expose.w = ret->data.expose.h = 0;
 		break;
 	case SDL_MOUSEMOTION:
-		ret = &ev;
-		ev.type = EMotion;
-		ev.data.motion.x = event.motion.x / FS;
-		ev.data.motion.y = event.motion.y / FS;
+		ret->type = EMotion;
+		ret->data.motion.x = event.motion.x / FS;
+		ret->data.motion.y = event.motion.y / FS;
 	//	fprintf(stderr, "event: motion %d %d\n",
 	//		event.motion.x, event.motion.y);
 		break;
 	case SDL_MOUSEBUTTONDOWN:
-		ret = &ev;
-		ev.type = EClick;
-		ev.data.click.button = event.button.button;
-		ev.data.click.point.x = event.button.x / FS;
-		ev.data.click.point.y = event.button.y / FS;
+		ret->type = EClick;
+		ret->data.click.button = event.button.button;
+		ret->data.click.point.x = event.button.x / FS;
+		ret->data.click.point.y = event.button.y / FS;
 		fprintf(stderr, "event: click %d\n", event.button.button);
 		break;
 	case SDL_KEYDOWN:
-		if (ev.data.key.keycode != 0 && event.key.keysym.unicode != 0) {
-			ret = &ev;
-			ev.type = EKey;
-			ev.data.key.keycode = event.key.keysym.unicode;
-			ev.data.key.modmask = 0;
+		if (ret->data.key.keycode != 0 && event.key.keysym.unicode != 0) {
+			ret->type = EKey;
+			ret->data.key.keycode = event.key.keysym.unicode;
+			ret->data.key.modmask = 0;
 			if(event.key.keysym.mod & KMOD_CTRL)
-				ev.data.key.modmask |= Ctrl;
+				ret->data.key.modmask |= Ctrl;
 			if(event.key.keysym.mod & KMOD_SHIFT)
-				ev.data.key.modmask |= Shift;
+				ret->data.key.modmask |= Shift;
 			if(event.key.keysym.mod & KMOD_ALT)
-				ev.data.key.modmask |= Alt;
+				ret->data.key.modmask |= Alt;
 			if(event.key.keysym.mod & KMOD_META)
-				ev.data.key.modmask |= Meta;
+				ret->data.key.modmask |= Meta;
 			fprintf(stderr, "event: key %d %d\n", 
-				ev.data.key.modmask, ev.data.key.keycode);
+				ret->data.key.modmask, ret->data.key.keycode);
 		}
 		break;
 	case SDL_QUIT:
 		fprintf(stderr, "event: quit\n");
-		ev.type = ev.type = EQuit;
-		ret = &ev;
+		ret->type = ret->type = EQuit;
 		break;
 	}
 	has_event = 0;
@@ -168,37 +163,38 @@ swk_gi_flip() {
 }
 
 /* -- drawing primitives -- */
-void
-swk_gi_line(int x, int y, int w, int h, int color) {
-	int i;
-	x *= FS; y *= FS;
-	w *= FS; h *= FS;
 
-	if (w==0) for(i=0;i<h;i++) putpixel(x, y+i, pal[color]);
+void
+swk_gi_line(int x1, int y1, int x2, int y2, int color) {
+	int i;
+	x1 *= FS; y1 *= FS;
+	x2 *= FS; y2 *= FS;
+
+	if (x2==0) for(i=0;i<y2;i++) putpixel(x1, y1+i, pal[color]);
 	else
-	if (h==0) for(i=0;i<w;i++) putpixel(x+i, y, pal[color]);
+	if (y2==0) for(i=0;i<x2;i++) putpixel(x1+i, y1, pal[color]);
 }
 
 void
-swk_gi_fill(int x, int y, int w, int h, int color) {
-	SDL_Rect area = { x*FS, y*FS, w*FS, h*FS };
+swk_gi_fill(Rect r, int color) {
+	SDL_Rect area = { r.x*FS, r.y*FS, r.w*FS, r.h*FS };
 	SDL_FillRect(screen, &area, pal[color]);
 }
 
 void
-swk_gi_rect(int x, int y, int w, int h, int color) {
-	swk_gi_line(x, y, w, 0, color);
-	swk_gi_line(x, y+h, w, 0, color);
-	swk_gi_line(x, y, 0, h, color);
-	swk_gi_line(x+w, y, 0, h, color);
+swk_gi_rect(Rect r, int color) {
+	swk_gi_line(r.x, r.y, r.w, 0, color);
+	swk_gi_line(r.x, r.y+r.h, r.w, 0, color);
+	swk_gi_line(r.x, r.y, 0, r.h, color);
+	swk_gi_line(r.x+r.w, r.y, 0, r.h, color);
 }
 
 void
-swk_gi_text(int x, int y, const char *text) {
+swk_gi_text(Rect r, const char *text) {
 	if (*text) {
 		SDL_Surface *ts = TTF_RenderText_Solid(font, text, fontcolor);
 		if (ts) {
-			SDL_Rect to = { x*FS, y*FS, ts->w, ts->h };
+			SDL_Rect to = { (r.x+1)*FS, r.y*FS, ts->w, ts->h };
 			SDL_BlitSurface(ts, NULL, screen, &to);
 			SDL_FreeSurface(ts);
 		} else fprintf(stderr, "Cannot render string (%s)\n", text);

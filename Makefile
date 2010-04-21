@@ -1,5 +1,5 @@
 CC?=gcc
-CFLAGS?=-Wall -g
+CFLAGS?=-Wall -g -std=c99
 VERSION=0.1
 DESTDIR?=
 PREFIX?=${DESTDIR}/usr/local
