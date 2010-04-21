@@ -4,17 +4,15 @@ VERSION=0.1
 DESTDIR?=
 PREFIX?=${DESTDIR}/usr/local
 LIBDIR?=${PREFIX}/lib
+CFLAGS+=-I.
 
 # graphic backend
 GI?=sdl
-GI_LIBS=-lSDL
+GI_LIBS=-lSDL -lSDL_ttf
 
 GI_OBJS=gi_${GI}.o
 
 all: static test
-
-test.o:
-	${CC} -I. test.c -c -o test.o
 
 test: test.o libswk.a
 	${CC} test.o -o test libswk.a ${GI_LIBS}

@@ -1,8 +1,10 @@
 /* See LICENSE file for copyright and license details. */
-#define SWK_NEWLINE .h=-1, .w=-1
+
+#define SWK_NEWLINE(x) .data=(void*)(size_t)x, .r.w=-1, .r.h=-1, .cb = swk_filler
 
 typedef enum { EVoid, EClick, EMotion, EKey, EExpose, EQuit, ELast } SwkEventType;
-typedef enum { Shift=1, Ctrl=2, Meta=4 } SwkKeyMod;
+typedef enum { Shift=1, Ctrl=2, Alt=4, Meta=8 } SwkKeyMod;
+typedef enum { ColorFG, ColorBG, ColorHI, ColorLast } Palete;
 
 typedef struct SwkBox SwkBox;
 
@@ -37,14 +39,14 @@ typedef struct {
 		Point motion;
 		Key key;
 		Rect expose;
+		int rows;
 	} data;
 } SwkEvent; 
 
 typedef void (*SwkEventCallback)(SwkEvent *e);
 
 struct SwkBox {
-	int w;
-	int h;
+	Rect r;
 	SwkEventCallback cb;
 	char *text;
 	void *data;
@@ -59,10 +61,14 @@ typedef struct {
 
 int swk_init(SwkWindow *w);
 int swk_gi_update(SwkWindow *w);
+void swk_update();
 void swk_exit();
 void swk_fit();
+void swk_loop();
+void swk_fit_row(SwkBox *a, SwkBox *b, int y);
 SwkEvent * swk_event();
 void swk_event_handle(SwkEvent *e);
+int swk_gi_has_event();
 
 void swk_focus_next();
 void swk_focus_prev();
@@ -80,7 +86,7 @@ SwkEvent * swk_gi_event();
 
 void swk_gi_flip();
 
-void swk_gi_line(int x, int y, int w, int h);
-void swk_gi_box(int x, int y, int w, int h);
-void swk_gi_rect(int x, int y, int w, int h);
+void swk_gi_line(int x, int y, int w, int h, int color);
+void swk_gi_fill(int x, int y, int w, int h, int color);
+void swk_gi_rect(int x, int y, int w, int h, int color);
 void swk_gi_text(int x, int y, const char *text);
