@@ -13,7 +13,6 @@
 #define BPP 32
 /* --- */
 
-
 static Uint32 pal[ColorLast];
 static SDL_Color fontcolor = { TFCOLOR };
 static SDL_Surface *screen = NULL;

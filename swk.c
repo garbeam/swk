@@ -1,5 +1,7 @@
 /* See LICENSE file for copyright and license details. */
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 #include "swk.h"
 
 static int running = 0;
@@ -94,23 +96,25 @@ swk_event_handle(SwkEvent *e) {
 	SwkBox *b;
 	switch(e->type) {
 	case EKey:
-		if (e->data.key.keycode == 9) {
-			/* not working */
-			if (e->data.key.modmask&Ctrl)
+		if (e->data.key.keycode == 9) { // TAB
+			if (e->data.key.modmask)
 				swk_focus_prev();
 			else swk_focus_next();
 			swk_update();
+		} else
+		if (e->data.key.keycode == 13) { // ENTER
+			e->box = w->box;
+			e->type = EClick;
 		}
 		// send key to focused box
 		e->box = w->box;
 		if (w->box)
 			w->box->cb(e);
+		swk_update();
 		break;
 	case EMotion:
-		for(b=w->boxes;b->cb;b++) {
-			Point p = e->data.motion;
-			if (p.x>=b->r.x && p.x<=(b->r.x+b->r.w)
-			&&  p.y>=b->r.y && p.y<=(b->r.y+b->r.h)) {
+		for(b=w->boxes; b->cb; b++) {
+			if (SWK_HIT(b->r, e->data.click.point)) {
 				w->box = e->box = b;
 				b->cb(e);
 				swk_update();
@@ -119,10 +123,8 @@ swk_event_handle(SwkEvent *e) {
 		}
 		break;
 	case EClick:
-		for(b=w->boxes;b->cb;b++) {
-			Point p = e->data.click.point;
-			if (p.x>=b->r.x && p.x<=(b->r.x+b->r.w)
-			&&  p.y>=b->r.y && p.y<=(b->r.y+b->r.h)) {
+		for(b=w->boxes; b->cb; b++) {
+			if (SWK_HIT(b->r, e->data.click.point)) {
 				e->box = w->box = b;
 				e->box->cb(e);
 				swk_update();
@@ -145,6 +147,10 @@ swk_focus_next() {
 	w->box++;
 	if (w->box->cb == NULL)
 		w->box = w->boxes;
+	while(w->box->cb == swk_filler)
+		w->box++;
+	if(w->box->cb == NULL)
+		w->box = w->boxes;
 }
 
 void
@@ -153,7 +159,17 @@ swk_focus_prev() {
 		while(w->box->cb)
 			w->box++;
 		w->box--;
-	} else w->box--;
+	} else {
+		w->box--;
+		while (w->box->cb == swk_filler) {
+			w->box--;
+			if (w->box < w->boxes) {
+				w->box = w->boxes;
+				swk_focus_prev();
+				return;
+			}
+		}
+	}
 }
 
 /* widgets */
@@ -163,6 +179,8 @@ swk_label(SwkEvent *e) {
 	switch(e->type) {
 	case EExpose:
 		r = e->box->r;
+		if (w->box == e->box)
+			swk_gi_line(r.x, r.y+1, r.w, 0, ColorHI);
 		swk_gi_text(r.x, r.y, e->box->text);
 		break;
 	default:
@@ -172,6 +190,30 @@ swk_label(SwkEvent *e) {
 
 void
 swk_entry(SwkEvent *e) {
+	int len, key;
+	char *ptr;
+	switch(e->type) {
+	case EKey:
+		key = e->data.key.keycode;
+		if (key==8) {
+			ptr = strdup (e->box->text);
+			if(e->box->data)
+				free(e->box->text);
+			if((len = strlen (ptr))>0)
+				ptr[len-1] = '\0';
+			e->box->text = e->box->data = ptr;
+		} else {
+			ptr = (char*)malloc(strlen(e->box->text)+2);
+			sprintf(ptr, "%s%c", e->box->text, e->data.key.keycode);
+			if(e->box->data)
+				free(e->box->text);
+			e->box->text = e->box->data = ptr;
+		}
+		break;
+	default:
+		swk_label(e);
+		break;
+	}
 }
 
 void

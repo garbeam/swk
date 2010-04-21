@@ -1,6 +1,7 @@
 /* See LICENSE file for copyright and license details. */
 
 #define SWK_NEWLINE(x) .data=(void*)(size_t)x, .r.w=-1, .r.h=-1, .cb = swk_filler
+#define SWK_HIT(r,p) (p.x>=r.x && p.x<(r.x+r.w) && p.y>=r.y && p.y<(r.y+r.h))
 
 typedef enum { EVoid, EClick, EMotion, EKey, EExpose, EQuit, ELast } SwkEventType;
 typedef enum { Shift=1, Ctrl=2, Alt=4, Meta=8 } SwkKeyMod;
