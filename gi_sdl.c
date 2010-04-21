@@ -8,7 +8,7 @@
 #define TFCOLOR 0xff,0xff,0xff
 #define FONTNAME "Inconsolata.otf"
 //#define FONTSIZE 16
-#define FONTSIZE 32
+#define FONTSIZE 14
 #define FS FONTSIZE
 #define BPP 32
 /* --- */
@@ -64,7 +64,7 @@ swk_gi_init(SwkWindow *w) {
 	if (font == NULL) {
 		fprintf(stderr, "Cannot open font '%s'\n", FONTNAME);
 		return 0;
-	}
+	} //else TTF_SetFontStyle(font, TTF_STYLE_BOLD);
 	return 1;
 }
 

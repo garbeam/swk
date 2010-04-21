@@ -47,8 +47,8 @@ swk_loop() {
 			swk_event_handle(e);
 	} while (!e || e->type != EQuit);
 }
-void
-swk_fit_row(SwkBox *a, SwkBox *b, int y) {
+
+static void swk_fit_row(SwkBox *a, SwkBox *b, int y) {
 	int count, x = 0;
 	SwkBox *btmp;
 	count = 0;

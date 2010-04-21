@@ -65,7 +65,6 @@ void swk_update();
 void swk_exit();
 void swk_fit();
 void swk_loop();
-void swk_fit_row(SwkBox *a, SwkBox *b, int y);
 SwkEvent * swk_event();
 void swk_event_handle(SwkEvent *e);
 int swk_gi_has_event();
