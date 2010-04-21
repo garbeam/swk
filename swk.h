@@ -73,6 +73,7 @@ SwkEvent *swk_next_event(SwkWindow *w);
 int swk_has_event(SwkWindow *w);
 void swk_handle_event(SwkEvent *e);
 
+void swk_focus_first(SwkWindow *w);
 void swk_focus_next(SwkWindow *w);
 void swk_focus_prev(SwkWindow *w);
 

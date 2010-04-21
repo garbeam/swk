@@ -4,12 +4,13 @@
 #include <stdlib.h>
 #include "swk.h"
 
+// move into SwkWindow* ?
 static int running = 0;
 
 int
 swk_init(SwkWindow *w) {
 	w->_e.win = w;
-	w->box = w->boxes;
+	swk_focus_first(w);
 	if(w->r.w == 0 || w->r.h == 0) {
 		w->r.w = 640;
 		w->r.h = 480;
@@ -47,7 +48,7 @@ swk_loop(SwkWindow *w) {
 	do {
 		if((e = swk_next_event(w)))
 			swk_handle_event(e);
-	} while (!e || e->type != EQuit);
+	} while(!e || e->type != EQuit);
 }
 
 static void swk_fit_row(SwkWindow *w, SwkBox *a, SwkBox *b, int y) {
@@ -101,7 +102,24 @@ swk_handle_event(SwkEvent *e) {
 	SwkBox *b;
 	switch(e->type) {
 	case EKey:
-		// TODO: handle ^Y and ^P to copypasta box->text
+		// TODO: ^F ullscreen? handle ^Y and ^P to copypasta box->text
+		// ^A focus first widget, ^E focus last widget ?
+		if(e->data.key.modmask == 2) {
+			switch(e->data.key.keycode) {
+			case 8:
+				swk_focus_first(e->win);
+				break;
+			case 10:
+				swk_focus_next(e->win);
+				break;
+			case 11:
+				swk_focus_prev(e->win);
+				break;
+			case 12:
+				e->type = EClick;
+				break;
+			}
+		} else
 		if(e->data.key.keycode == 9) { // TAB
 			if(e->data.key.modmask)
 				swk_focus_prev(e->win);
@@ -111,6 +129,11 @@ swk_handle_event(SwkEvent *e) {
 		if(e->data.key.keycode == 13) { // ENTER
 			e->box = e->win->box;
 			e->type = EClick;
+		} else
+		if(e->data.key.keycode == 27) { // ESC
+			e->box = e->win->box;
+			e->type = EQuit;
+			swk_exit();
 		}
 		// send key to focused box
 		e->box = e->win->box;
@@ -149,6 +172,15 @@ swk_handle_event(SwkEvent *e) {
 }
 
 void
+swk_focus_first(SwkWindow *w) {
+	w->box = w->boxes;
+	while(w->box->cb == swk_filler)
+		w->box++;
+	if(w->box->cb == NULL)
+		w->box = w->boxes;
+}
+
+void
 swk_focus_next(SwkWindow *w) {
 	w->box++;
 	if(w->box->cb == NULL)
@@ -156,7 +188,7 @@ swk_focus_next(SwkWindow *w) {
 	while(w->box->cb == swk_filler)
 		w->box++;
 	if(w->box->cb == NULL)
-		w->box = w->boxes;
+		swk_focus_first(w);
 }
 
 void
@@ -167,7 +199,7 @@ swk_focus_prev(SwkWindow *w) {
 		w->box--;
 	} else {
 		w->box--;
-		while (w->box->cb == swk_filler) {
+		while(w->box->cb == swk_filler) {
 			w->box--;
 			if(w->box < w->boxes) {
 				w->box = w->boxes;
@@ -202,18 +234,21 @@ swk_entry(SwkEvent *e) {
 	case EKey:
 		key = e->data.key.keycode;
 		if(key == 8) {
-			ptr = strdup (e->box->text);
+			ptr = (char*)malloc(strlen(e->box->text)+2);
+			strcpy(ptr, e->box->text);
 			if(e->box->data)
 				free(e->box->text);
 			if((len = strlen (ptr))>0)
 				ptr[len-1] = '\0';
 			e->box->text = e->box->data = ptr;
 		} else {
-			ptr = (char*)malloc(strlen(e->box->text)+2);
-			sprintf(ptr, "%s%c", e->box->text, e->data.key.keycode);
-			if(e->box->data)
-				free(e->box->text);
-			e->box->text = e->box->data = ptr;
+			if(key>=' '&&key<='~') {
+				ptr = (char*)malloc(strlen(e->box->text)+2);
+				sprintf(ptr, "%s%c", e->box->text, e->data.key.keycode);
+				if(e->box->data)
+					free(e->box->text);
+				e->box->text = e->box->data = ptr;
+			}
 		}
 		break;
 	default:
@@ -231,6 +266,7 @@ swk_button(SwkEvent *e) {
 		if(e->win->box == e->box)
 			swk_gi_rect(r, ColorHI);
 		else swk_gi_rect(r, ColorFG);
+		r.x++;
 		swk_gi_text(r, e->box->text);
 		break;
 	default:
