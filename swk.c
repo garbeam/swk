@@ -120,20 +120,28 @@ swk_handle_event(SwkEvent *e) {
 				break;
 			}
 		} else
-		if(e->data.key.keycode == 9) { // TAB
+		switch(e->data.key.keycode) {
+		case KUp:
+			swk_focus_prev(e->win);
+			break;
+		case KDown:
+			swk_focus_next(e->win);
+			break;
+		case 9: // TAB
 			if(e->data.key.modmask)
 				swk_focus_prev(e->win);
 			else swk_focus_next(e->win);
 			swk_update(e->win);
-		} else
-		if(e->data.key.keycode == 13) { // ENTER
+			break;
+		case 13: // ENTER
 			e->box = e->win->box;
 			e->type = EClick;
-		} else
-		if(e->data.key.keycode == 27) { // ESC
+			break;
+		case 27: // ESC
 			e->box = e->win->box;
 			e->type = EQuit;
 			swk_exit();
+			break;
 		}
 		// send key to focused box
 		e->box = e->win->box;
@@ -223,6 +231,33 @@ swk_label(SwkEvent *e) {
 		break;
 	default:
 		break;
+	}
+}
+
+void
+swk_password(SwkEvent *e) {
+	int len;
+	Rect r;
+	char *str, *ptr;
+	switch(e->type) {
+	case EExpose:
+		r = e->box->r;
+		if(e->win->box == e->box)
+			swk_gi_line(r.x, r.y+1, r.w, 0, ColorHI);
+		len = strlen(e->box->text);
+		if (len>0) {
+			ptr = str = malloc(len+1);
+			for(;len--;ptr++)
+				*ptr='*';
+			*ptr='\0';
+			swk_gi_text(r, str);
+			free(str);
+		}
+		break;
+	case EClick:
+		printf("password: %s\n", e->box->text);
+	default:
+		swk_entry(e);
 	}
 }
 

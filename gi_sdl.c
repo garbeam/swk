@@ -126,20 +126,32 @@ swk_gi_event(SwkWindow *w, int dowait) {
 		fprintf(stderr, "event: click %d\n", event.button.button);
 		break;
 	case SDL_KEYDOWN:
+		ret->data.key.modmask = 0;
+		ret->type = EKey;
+		if(event.key.keysym.mod & KMOD_CTRL)
+			ret->data.key.modmask |= Ctrl;
+		if(event.key.keysym.mod & KMOD_SHIFT)
+			ret->data.key.modmask |= Shift;
+		if(event.key.keysym.mod & KMOD_ALT)
+			ret->data.key.modmask |= Alt;
+		if(event.key.keysym.mod & KMOD_META)
+			ret->data.key.modmask |= Meta;
 		if(ret->data.key.keycode != 0 && event.key.keysym.unicode != 0) {
-			ret->type = EKey;
 			ret->data.key.keycode = event.key.keysym.unicode;
-			ret->data.key.modmask = 0;
-			if(event.key.keysym.mod & KMOD_CTRL)
-				ret->data.key.modmask |= Ctrl;
-			if(event.key.keysym.mod & KMOD_SHIFT)
-				ret->data.key.modmask |= Shift;
-			if(event.key.keysym.mod & KMOD_ALT)
-				ret->data.key.modmask |= Alt;
-			if(event.key.keysym.mod & KMOD_META)
-				ret->data.key.modmask |= Meta;
 			fprintf(stderr, "event: key %d %d\n", 
 				ret->data.key.modmask, ret->data.key.keycode);
+		} else {
+			switch(event.key.keysym.sym) {
+			case 273:
+				ret->data.key.keycode = KUp;
+				break;
+			case 274:
+				ret->data.key.keycode = KDown;
+				break;
+			default:
+				ret->type = -1;
+				break;
+			}
 		}
 		break;
 	case SDL_QUIT:

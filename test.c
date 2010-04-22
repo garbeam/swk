@@ -23,7 +23,7 @@ static SwkBox helloworld[] = {
 	{ .cb=swk_filler, },
 	SWK_BOX_NEWLINE(1),
 	{ .cb=swk_label, .text="Password:", },
-	{ .cb=swk_entry, .text="****", },
+	{ .cb=swk_password, .text="1234", },
 	{ .cb=swk_filler, },
 	SWK_BOX_NEWLINE(2),
 	{ .cb=mybutton, .text="yes" },
