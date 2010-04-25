@@ -29,6 +29,9 @@ static SwkBox helloworld[] = {
 	{ .cb=mybutton, .text="yes" },
 	{ .cb=mybutton, .text="no" },
 	{ .cb=swk_filler, },
+	SWK_BOX_NEWLINE(1),
+	{ .cb=swk_option, .text="remember values", },
+	{ .cb=swk_option, .text="pasta barata", },
 	SWK_BOX_NEWLINE(5),
 	{ .cb=swk_label, .text="--swktest", },
 	{ .cb=NULL }
@@ -40,6 +43,11 @@ main() {
 		.title="Hello World",
 		.boxes=helloworld,
 		.box=helloworld+10
+/*
+	// TODO: application workflow
+	.ok=cb
+	.cancel=cb
+*/
 	};
 	if(!swk_init(&w))
 		return 1;

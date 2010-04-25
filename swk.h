@@ -91,6 +91,7 @@ void swk_label(SwkEvent *e);
 void swk_entry(SwkEvent *e);
 void swk_password(SwkEvent *e);
 void swk_filler(SwkEvent *e);
+void swk_option(SwkEvent *e);
 
 /* graphic backend */
 

@@ -295,3 +295,28 @@ void
 swk_filler(SwkEvent *e) {
 	/* empty widget */
 }
+
+void
+swk_option(SwkEvent *e) {
+	Rect r;
+	switch(e->type) {
+	case EClick:
+		if(e->box==e->box->data)
+			e->box->data = NULL;
+		else e->box->data = e->box;
+		break;
+	case EExpose:
+		r = e->box->r;
+		r.w = r.h = 1;
+		if(e->box==e->box->data)
+			swk_gi_fill(r, ColorFG);
+		else swk_gi_rect(r, ColorFG);
+		if(e->win->box == e->box)
+			swk_gi_line(r.x, r.y+1, r.w, 0, ColorHI);
+		r.x+=2;
+		swk_gi_text(r, e->box->text);
+		break;
+	default:
+		break;
+	}
+}
