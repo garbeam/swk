@@ -38,7 +38,8 @@ int
 main() {
 	SwkWindow w = {
 		.title="Hello World",
-		.boxes=helloworld
+		.boxes=helloworld,
+		.box=helloworld+10
 	};
 	if(!swk_init(&w))
 		return 1;

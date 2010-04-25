@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "swk.h"
+#include "config.h"
 
 // move into SwkWindow* ?
 static int running = 0;
@@ -10,7 +11,8 @@ static int running = 0;
 int
 swk_init(SwkWindow *w) {
 	w->_e.win = w;
-	swk_focus_first(w);
+	if (w->box == NULL)
+		swk_focus_first(w);
 	if(w->r.w == 0 || w->r.h == 0) {
 		w->r.w = 640;
 		w->r.h = 480;
@@ -88,6 +90,12 @@ swk_has_event(SwkWindow *w) {
 	return swk_gi_has_event(w);
 }
 
+void
+swk_focus_activate(SwkWindow *w) {
+	w->_e.box = w->box;
+	w->_e.type = EClick;
+}
+
 SwkEvent *
 swk_next_event(SwkWindow *w) {
 	if(running)
@@ -99,45 +107,19 @@ swk_next_event(SwkWindow *w) {
 
 void
 swk_handle_event(SwkEvent *e) {
+	int i;
 	SwkBox *b;
 	switch(e->type) {
 	case EKey:
-		// TODO: ^F ullscreen? handle ^Y and ^P to copypasta box->text
-		// ^A focus first widget, ^E focus last widget ?
-		if(e->data.key.modmask == 2) {
-			switch(e->data.key.keycode) {
-			case 8:
-				swk_focus_first(e->win);
-				break;
-			case 10:
-				swk_focus_next(e->win);
-				break;
-			case 11:
-				swk_focus_prev(e->win);
-				break;
-			case 12:
-				e->type = EClick;
+		for(i=0; keys[i].cb; i++) {
+			if (e->data.key.modmask == keys[i].modmask
+			&&  e->data.key.keycode == keys[i].keycode) {
+				keys[i].cb(e->win);
 				break;
 			}
-		} else
-		switch(e->data.key.keycode) {
-		case KUp:
-			swk_focus_prev(e->win);
-			break;
-		case KDown:
-			swk_focus_next(e->win);
-			break;
-		case 9: // TAB
-			if(e->data.key.modmask)
-				swk_focus_prev(e->win);
-			else swk_focus_next(e->win);
-			swk_update(e->win);
-			break;
-		case 13: // ENTER
-			e->box = e->win->box;
-			e->type = EClick;
-			break;
-		case 27: // ESC
+		}
+		/* XXX: this must be implemented in app? */
+		if (e->data.key.keycode==27) {
 			e->box = e->win->box;
 			e->type = EQuit;
 			swk_exit();

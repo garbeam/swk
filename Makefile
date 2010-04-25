@@ -14,7 +14,10 @@ GI_OBJS=gi_${GI}.o
 
 all: static test
 
-test: test.o libswk.a
+config.h:
+	cp config.def.h config.h
+
+test: config.h test.o libswk.a
 	${CC} test.o -o test libswk.a ${GI_LIBS}
 
 clean:
@@ -30,7 +33,9 @@ install:
 
 static: libswk.a
 
-libswk.a: swk.o ${GI_OBJS}
+swk.o: config.h
+
+libswk.a: config.h swk.o ${GI_OBJS}
 	rm -f libswk.a
 	ar qcvf libswk.a swk.o ${GI_OBJS}
 	echo CFLAGS+=-I${PREFIX}/include > swk.mk

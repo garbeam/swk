@@ -9,7 +9,10 @@ typedef enum { ColorFG, ColorBG, ColorHI, ColorLast } Palete;
 typedef enum { KUp=0xe0, KDown=0xe1, KLeft=0xe2, KRight=0xe3 } SwkKeyCode;
 
 typedef struct SwkBox SwkBox;
+typedef struct SwkEvent SwkEvent;
 typedef struct SwkWindow SwkWindow;
+typedef void (*SwkEventCallback)(SwkEvent *e);
+typedef void (*SwkKeyCallback)(SwkWindow *w);
 
 typedef struct {
 	int x;
@@ -30,11 +33,17 @@ typedef struct {
 } Click;
 
 typedef struct {
-	int keycode;
 	int modmask;
+	int keycode;
 } Key;
 
 typedef struct {
+	int modmask;
+	int keycode;
+	SwkKeyCallback cb;
+} SwkKeyBind;
+
+struct SwkEvent {
 	SwkEventType type;
 	SwkBox *box;
 	SwkWindow *win;
@@ -45,9 +54,7 @@ typedef struct {
 		Rect expose;
 		int rows;
 	} data;
-} SwkEvent; 
-
-typedef void (*SwkEventCallback)(SwkEvent *e);
+}; 
 
 struct SwkBox {
 	Rect r;
@@ -77,6 +84,7 @@ void swk_handle_event(SwkEvent *e);
 void swk_focus_first(SwkWindow *w);
 void swk_focus_next(SwkWindow *w);
 void swk_focus_prev(SwkWindow *w);
+void swk_focus_activate(SwkWindow *w);
 
 void swk_button(SwkEvent *e);
 void swk_label(SwkEvent *e);

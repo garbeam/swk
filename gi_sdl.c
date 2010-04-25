@@ -2,17 +2,22 @@
 #include <SDL/SDL.h>
 #include <SDL/SDL_ttf.h>
 #include "swk.h"
+#include "config.h"
 
+//#define SWK_COLOR(r,g,b) 0x##r,0x##g,0x##b
+
+#if 0
 #define HICOLOR 0x00,0x66,0xff
 #define FGCOLOR 0xff,0xff,0xff
 #define BGCOLOR 0x00,0x00,0x00
 #define TFCOLOR 0xcc,0xcc,0xcc
+#endif
+
+/* --- */
 #define FONTNAME "Inconsolata.otf"
-#define FONTSIZE 14
 #define FS FONTSIZE
 #define BPP 32
 #define SDLFLAGS SDL_DOUBLEBUF|SDL_RESIZABLE
-/* --- */
 
 static Uint32 pal[ColorLast];
 static SDL_Color fontcolor = { TFCOLOR };
@@ -181,7 +186,6 @@ swk_gi_line(int x1, int y1, int x2, int y2, int color) {
 	int i;
 	x1 *= FS; y1 *= FS;
 	x2 *= FS; y2 *= FS;
-
 	if(x2==0) for(i=0;i<y2;i++) putpixel(x1, y1+i, pal[color]);
 	else
 	if(y2==0) for(i=0;i<x2;i++) putpixel(x1+i, y1, pal[color]);
