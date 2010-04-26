@@ -2,6 +2,7 @@
 
 /* appearance */
 #define FONTSIZE 14
+#define FONTBOLD 1
 #define WINWIDTH 640
 #define WINHEIGHT 480
 // SDL
@@ -10,7 +11,7 @@
 //#define SWK_COLOR(r,g,b) r##g##b
 
 #define HICOLOR SWK_COLOR(0,66,ff)
-#define FGCOLOR SWK_COLOR(ff,ff,ff)
+#define FGCOLOR SWK_COLOR(e0,e0,e0)
 #define BGCOLOR SWK_COLOR(00,00,00)
 #define TFCOLOR SWK_COLOR(cc,cc,cc)
 

@@ -5,9 +5,6 @@
 #include "swk.h"
 #include "config.h"
 
-// move into SwkWindow* ?
-static int running = 0;
-
 int
 swk_init(SwkWindow *w) {
 	w->_e.win = w;
@@ -18,10 +15,10 @@ swk_init(SwkWindow *w) {
 		w->r.h = WINHEIGHT;
 	}
 	if(swk_gi_init(w)) {
-		running = 1;
+		w->running = 1;
 		swk_update(w);
 	}
-	return running;
+	return w->running;
 }
 
 void
@@ -36,12 +33,12 @@ swk_update(SwkWindow *w) {
 			b->cb(&w->_e);
 		}
 		swk_gi_flip();
-	} else running = 0;
+	} else w->running = 0;
 }
 
 void
-swk_exit(void) {
-	running = 0;
+swk_exit(SwkWindow *w) {
+	w->running = 0;
 }
 
 void
@@ -96,7 +93,7 @@ swk_fit(SwkWindow *w) {
 			} else {
 				swk_fit_row(w, b2, b, y);
 				b2 = b+1;
-				y += (w->r.h-countrows(b2));
+				y += 1+(w->r.h-countrows(b2));
 				if (y<0) {
 					fprintf(stderr, "overflow: must scroll\n");
 					y=0;
@@ -120,7 +117,7 @@ swk_focus_activate(SwkWindow *w) {
 
 SwkEvent *
 swk_next_event(SwkWindow *w) {
-	if(running)
+	if(w->running)
 		return swk_gi_event(w, 1);
 	w->_e.type = EQuit;
 	w->_e.win = w;
@@ -144,7 +141,7 @@ swk_handle_event(SwkEvent *e) {
 		if (e->data.key.keycode==27) {
 			e->box = e->win->box;
 			e->type = EQuit;
-			swk_exit();
+			swk_exit(e->win);
 			break;
 		}
 		// send key to focused box
@@ -222,16 +219,17 @@ swk_focus_prev(SwkWindow *w) {
 	}
 }
 
-/* widgets */
+/* -- widgets -- */
+
 void
 swk_label(SwkEvent *e) {
 	Rect r;
 	switch(e->type) {
 	case EExpose:
 		r = e->box->r;
+		swk_gi_text(r, e->box->text);
 		if(e->win->box == e->box)
 			swk_gi_line(r.x, r.y+1, r.w, 0, ColorHI);
-		swk_gi_text(r, e->box->text);
 		break;
 	default:
 		break;
@@ -302,11 +300,12 @@ swk_button(SwkEvent *e) {
 	switch(e->type) {
 	case EExpose:
 		r = e->box->r;
+		r.x++;
+		swk_gi_text(r, e->box->text);
+		r.x--;
 		if(e->win->box == e->box)
 			swk_gi_rect(r, ColorHI);
 		else swk_gi_rect(r, ColorFG);
-		r.x++;
-		swk_gi_text(r, e->box->text);
 		break;
 	default:
 		break;
@@ -320,21 +319,41 @@ swk_filler(SwkEvent *e) {
 
 void
 swk_option(SwkEvent *e) {
-	SwkBox **b = (SwkBox**)e->box->data;
 	Rect r;
+	SwkBox **b = (SwkBox**)e->box->data;
 	switch(e->type) {
 	case EClick:
-		*b = (e->box==*b)?NULL:e->box;
+		if (b==(void*)0) e->box->data = (void*)1;
+		else if (b==(void*)1) e->box->data = (void*)0;
+		else *b = (e->box==*b)?NULL:e->box;
 		break;
 	case EExpose:
 		r = e->box->r;
 		if(e->win->box == e->box)
 			swk_gi_line(r.x, r.y+1, r.w, 0, ColorHI);
 		r.w = r.h = 1;
-		if(e->box==*b) swk_gi_fill(r, ColorFG);
-		else swk_gi_rect(r, ColorFG);
+		if (b==(void*)1) swk_gi_fill(r, ColorHI, 1);
+		else if (b==(void*)0) swk_gi_fill(r, ColorFG, 1);
+		else if (e->box==*b) swk_gi_fill(r, ColorHI, 1);
+		else swk_gi_fill(r, ColorFG, 1);
+		r = e->box->r;
 		r.x += 2;
 		swk_gi_text(r, e->box->text);
+		break;
+	default:
+		break;
+	}
+}
+
+void
+swk_separator(SwkEvent *e) {
+	Rect r;
+	switch(e->type) {
+	case EExpose:
+		r = e->box->r;
+		if(e->win->box == e->box)
+			swk_gi_line(r.x, r.y+1, r.w, 0, ColorHI);
+		else swk_gi_line(r.x, r.y+1, r.w, 0, ColorFG);
 		break;
 	default:
 		break;

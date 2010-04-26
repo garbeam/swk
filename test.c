@@ -14,27 +14,30 @@ static void mybutton(SwkEvent *e) {
 			printf("Option: none\n");
 		else printf("Option: %s\n", opt->text);
 		if(count-- == 0)
-			swk_exit();
+			swk_exit(e->win);
 	}
 	swk_button(e);
 }
 
 static SwkBox helloworld[] = {
 	{ .cb=swk_label, .text="Press a button", },
+	SWK_BOX_NEWLINE(1),
+	{ .cb=swk_separator },
 	SWK_BOX_NEWLINE(2),
 	{ .cb=swk_label, .text="Username:", },
 	{ .cb=swk_entry, .text="____", },
-	{ .cb=swk_filler, },
 	SWK_BOX_NEWLINE(1),
 	{ .cb=swk_label, .text="Password:", },
 	{ .cb=swk_password, .text="1234", },
-	{ .cb=swk_filler, },
 	SWK_BOX_NEWLINE(-1),
 	{ .cb=mybutton, .text="yes" },
 	{ .cb=mybutton, .text="no" },
 	{ .cb=swk_filler, },
 	SWK_BOX_NEWLINE(2),
+	{ .cb=swk_option, .text="zoot" },
+	SWK_BOX_NEWLINE(1),
 	{ .cb=swk_option, .text="remember values", .data=&opt },
+//	{ .cb=swk_option, .text="null" },
 	SWK_BOX_NEWLINE(1),
 	{ .cb=swk_option, .text="pasta barata", .data=&opt },
 	SWK_BOX_NEWLINE(5),

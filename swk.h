@@ -66,6 +66,7 @@ struct SwkBox {
 
 struct SwkWindow {
 	char *title;
+	int running;
 	Rect r;
 	SwkBox *boxes;
 	/* internal use */
@@ -75,7 +76,7 @@ struct SwkWindow {
 
 int swk_init(SwkWindow *w);
 void swk_update(SwkWindow *w);
-void swk_exit(void);
+void swk_exit(SwkWindow *w);
 void swk_fit(SwkWindow *w);
 void swk_loop(SwkWindow *w);
 SwkEvent *swk_next_event(SwkWindow *w);
@@ -93,6 +94,7 @@ void swk_entry(SwkEvent *e);
 void swk_password(SwkEvent *e);
 void swk_filler(SwkEvent *e);
 void swk_option(SwkEvent *e);
+void swk_separator(SwkEvent *e);
 
 /* graphic backend */
 
@@ -107,6 +109,6 @@ void swk_gi_clear();
 void swk_gi_flip();
 
 void swk_gi_line(int x1, int y1, int x2, int y2, int color);
-void swk_gi_fill(Rect r, int color);
+void swk_gi_fill(Rect r, int color, int lil);
 void swk_gi_rect(Rect r, int color);
 void swk_gi_text(Rect r, const char *text);
