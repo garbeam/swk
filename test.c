@@ -4,11 +4,15 @@
 static int count = 3;
 static char text[64];
 static SwkBox helloworld[];
+static SwkBox *opt = NULL;
 
 static void mybutton(SwkEvent *e) {
 	if (e->type == EClick) {
 		sprintf(text, "Do it again %d times\n", count);
 		helloworld[0].text = text;
+		if (opt == NULL)
+			printf("Option: none\n");
+		else printf("Option: %s\n", opt->text);
 		if(count-- == 0)
 			swk_exit();
 	}
@@ -25,13 +29,14 @@ static SwkBox helloworld[] = {
 	{ .cb=swk_label, .text="Password:", },
 	{ .cb=swk_password, .text="1234", },
 	{ .cb=swk_filler, },
-	SWK_BOX_NEWLINE(2),
+	SWK_BOX_NEWLINE(-1),
 	{ .cb=mybutton, .text="yes" },
 	{ .cb=mybutton, .text="no" },
 	{ .cb=swk_filler, },
+	SWK_BOX_NEWLINE(2),
+	{ .cb=swk_option, .text="remember values", .data=&opt },
 	SWK_BOX_NEWLINE(1),
-	{ .cb=swk_option, .text="remember values", },
-	{ .cb=swk_option, .text="pasta barata", },
+	{ .cb=swk_option, .text="pasta barata", .data=&opt },
 	SWK_BOX_NEWLINE(5),
 	{ .cb=swk_label, .text="--swktest", },
 	{ .cb=NULL }
@@ -42,7 +47,8 @@ main() {
 	SwkWindow w = {
 		.title="Hello World",
 		.boxes=helloworld,
-		.box=helloworld+10
+		.box=helloworld+10,
+		//.r = { 0, 0, 320, 240 },
 /*
 	// TODO: application workflow
 	.ok=cb

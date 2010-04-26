@@ -14,8 +14,8 @@ swk_init(SwkWindow *w) {
 	if (w->box == NULL)
 		swk_focus_first(w);
 	if(w->r.w == 0 || w->r.h == 0) {
-		w->r.w = 640;
-		w->r.h = 480;
+		w->r.w = WINWIDTH;
+		w->r.h = WINHEIGHT;
 	}
 	if(swk_gi_init(w)) {
 		running = 1;
@@ -66,20 +66,42 @@ static void swk_fit_row(SwkWindow *w, SwkBox *a, SwkBox *b, int y) {
 			btmp->r.y = y;
 			btmp->r.w = winc;
 			btmp->r.h = 1;
-			x+=winc;
+			x += winc;
 		}
 	}
 }
 
+static int
+countrows(SwkBox *b) {
+	int row = 0;
+	for(; b->cb; b++) {
+		if(b->r.w==-1&&b->r.h==-1)
+			row += (int)(size_t)b->data;
+		else row += b->r.h;
+	}
+	return row;
+}
+
 void
 swk_fit(SwkWindow *w) {
-	int y = 0;
+	int x, y = 0;
 	SwkBox *b, *b2;
 	for(b=b2=w->boxes; b->cb; b++) {
 		if(b->r.w==-1 && b->r.h==-1) {
-			swk_fit_row(w, b2, b, y);
-			y += (int)(size_t)b->data;
-			b2 = b+1;
+			x = (int)(size_t)b->data;
+			if (x>0) {
+				swk_fit_row(w, b2, b, y);
+				y += (int)(size_t)b->data;
+				b2 = b+1;
+			} else {
+				swk_fit_row(w, b2, b, y);
+				b2 = b+1;
+				y += (w->r.h-countrows(b2));
+				if (y<0) {
+					fprintf(stderr, "overflow: must scroll\n");
+					y=0;
+				}
+			}
 		}
 	}
 	swk_fit_row(w, b2, b, y);
@@ -298,22 +320,20 @@ swk_filler(SwkEvent *e) {
 
 void
 swk_option(SwkEvent *e) {
+	SwkBox **b = (SwkBox**)e->box->data;
 	Rect r;
 	switch(e->type) {
 	case EClick:
-		if(e->box==e->box->data)
-			e->box->data = NULL;
-		else e->box->data = e->box;
+		*b = (e->box==*b)?NULL:e->box;
 		break;
 	case EExpose:
 		r = e->box->r;
-		r.w = r.h = 1;
-		if(e->box==e->box->data)
-			swk_gi_fill(r, ColorFG);
-		else swk_gi_rect(r, ColorFG);
 		if(e->win->box == e->box)
 			swk_gi_line(r.x, r.y+1, r.w, 0, ColorHI);
-		r.x+=2;
+		r.w = r.h = 1;
+		if(e->box==*b) swk_gi_fill(r, ColorFG);
+		else swk_gi_rect(r, ColorFG);
+		r.x += 2;
 		swk_gi_text(r, e->box->text);
 		break;
 	default:

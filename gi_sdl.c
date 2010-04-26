@@ -4,16 +4,6 @@
 #include "swk.h"
 #include "config.h"
 
-//#define SWK_COLOR(r,g,b) 0x##r,0x##g,0x##b
-
-#if 0
-#define HICOLOR 0x00,0x66,0xff
-#define FGCOLOR 0xff,0xff,0xff
-#define BGCOLOR 0x00,0x00,0x00
-#define TFCOLOR 0xcc,0xcc,0xcc
-#endif
-
-/* --- */
 #define FONTNAME "Inconsolata.otf"
 #define FS FONTSIZE
 #define BPP 32
@@ -23,6 +13,9 @@ static Uint32 pal[ColorLast];
 static SDL_Color fontcolor = { TFCOLOR };
 static SDL_Surface *screen = NULL;
 static TTF_Font *font = NULL;
+/* FIXME: put ugly statics into void *aux of SwkWindow */
+static int has_event = 0;
+static SDL_Event lastev = { .type=-1 };
 
 static void putpixel(int x, int y, Uint32 pixel) { 
 	int bpp = screen->format->BytesPerPixel;
@@ -33,15 +26,15 @@ static void putpixel(int x, int y, Uint32 pixel) {
 #elif BPP == 16
 	*(Uint16 *)p = pixel; 
 #elif BPP == 24
-	#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-		p[0] = (pixel >> 16) & 0xff; 
-		p[1] = (pixel >> 8) & 0xff; 
-		p[2] = pixel & 0xff; 
-	#else
-		p[0] = pixel & 0xff; 
-		p[1] = (pixel >> 8) & 0xff; 
-		p[2] = (pixel >> 16) & 0xff; 
-	#endif
+# if SDL_BYTEORDER == SDL_BIG_ENDIAN
+	p[0] = (pixel >> 16) & 0xff; 
+	p[1] = (pixel >> 8) & 0xff; 
+	p[2] = pixel & 0xff; 
+# else
+	p[0] = pixel & 0xff; 
+	p[1] = (pixel >> 8) & 0xff; 
+	p[2] = (pixel >> 16) & 0xff; 
+# endif
 #elif BPP == 32
 	*(Uint32 *)p = pixel; 
 #endif
@@ -86,10 +79,6 @@ swk_gi_exit() {
 	SDL_Quit();
 }
 
-/* FIXME: put ugly statics into void *aux of SwkWindow */
-static int has_event = 0;
-static SDL_Event lastev = {.type=-1};
-
 int
 swk_gi_has_event(SwkWindow *w) {
 	if(!has_event)
@@ -108,6 +97,7 @@ swk_gi_event(SwkWindow *w, int dowait) {
 	if(has_event);
 	switch(event.type) {
 	default: ret = NULL; break;
+	case SDL_ACTIVEEVENT:
 	case SDL_VIDEORESIZE:
 		fprintf(stderr, "resize %d %d\n", event.resize.w, event.resize.h);
 		SDL_SetVideoMode(event.resize.w, event.resize.h, BPP, SDLFLAGS);

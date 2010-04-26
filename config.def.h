@@ -2,6 +2,8 @@
 
 /* appearance */
 #define FONTSIZE 14
+#define WINWIDTH 640
+#define WINHEIGHT 480
 // SDL
 #define SWK_COLOR(r,g,b) 0x##r,0x##g,0x##b
 // X11
