@@ -81,7 +81,7 @@ countrows(SwkBox *b) {
 
 void
 swk_fit(SwkWindow *w) {
-	int x, y = 0;
+	int x, yi, y = 0;
 	SwkBox *b, *b2;
 	for(b=b2=w->boxes; b->cb; b++) {
 		if(b->r.w==-1 && b->r.h==-1) {
@@ -93,11 +93,9 @@ swk_fit(SwkWindow *w) {
 			} else {
 				swk_fit_row(w, b2, b, y);
 				b2 = b+1;
-				y += 1+(w->r.h-countrows(b2));
-				if (y<0) {
-					fprintf(stderr, "overflow: must scroll\n");
-					y=0;
-				}
+				yi = (w->r.h-countrows(b2));
+				if (yi<2) y += 2;
+				else y += yi;
 			}
 		}
 	}

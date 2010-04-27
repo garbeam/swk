@@ -79,8 +79,8 @@ swk_gi_update(SwkWindow *w) {
 	screen = SDL_GetVideoSurface();
 	if (screen == NULL)
 		return 0;
-	w->r.w = screen->w / FS;
-	w->r.h = screen->h / FS;
+	w->r.w = (screen->w / FS)-1;
+	w->r.h = (screen->h / FS)-1;
 	return 1;
 }
 

@@ -5,6 +5,9 @@ static int count = 3;
 static char text[64];
 static SwkBox helloworld[];
 static SwkBox *opt = NULL;
+static void mybutton(SwkEvent *e);
+static void mybutton_about(SwkEvent *e);
+static void mybutton_about_ok(SwkEvent *e);
 
 static void mybutton(SwkEvent *e) {
 	if (e->type == EClick) {
@@ -15,6 +18,33 @@ static void mybutton(SwkEvent *e) {
 		else printf("Option: %s\n", opt->text);
 		if(count-- == 0)
 			swk_exit(e->win);
+	}
+	swk_button(e);
+}
+
+static SwkBox about[] = {
+	{ .cb=swk_label, .text="About this program...", },
+	SWK_BOX_NEWLINE(1),
+	{ .cb=swk_separator },
+	{ .cb=swk_label, .text="This program aims to be\nfor hackers\nand developers\n" },
+	SWK_BOX_NEWLINE(-1),
+	{ .cb=swk_filler },
+	{ .cb=mybutton_about_ok, .text="Ok" },
+	{ .cb=NULL }
+};
+
+static void mybutton_about_ok(SwkEvent *e) {
+	if (e->type == EClick) {
+		e->win->boxes = helloworld;
+		swk_update(e->win);
+	}
+	swk_button(e);
+}
+
+static void mybutton_about(SwkEvent *e) {
+	if (e->type == EClick) {
+		e->win->boxes = about;
+		swk_update(e->win);
 	}
 	swk_button(e);
 }
@@ -42,6 +72,7 @@ static SwkBox helloworld[] = {
 	{ .cb=swk_option, .text="pasta barata", .data=&opt },
 	SWK_BOX_NEWLINE(5),
 	{ .cb=swk_label, .text="--swktest", },
+	{ .cb=mybutton_about, .text="about" },
 	{ .cb=NULL }
 };
 
