@@ -8,7 +8,7 @@
 int
 swk_init(SwkWindow *w) {
 	w->_e.win = w;
-	if (w->box == NULL)
+	if(w->box == NULL)
 		swk_focus_first(w);
 	if(w->r.w == 0 || w->r.h == 0) {
 		w->r.w = WINWIDTH;
@@ -73,7 +73,7 @@ void
 swk_scroll_up(SwkWindow *w) {
 	SwkBox *b = w->boxes;
 	for(; b->cb; b++)
-		if (b->r.w==-1 && b->r.h==-1 && ((int)(size_t)b->data)<0) {
+		if(b->r.w==-1 && b->r.h==-1 && ((int)(size_t)b->data)<0) {
 			b->scroll++;
 			return;
 		}
@@ -84,7 +84,7 @@ void
 swk_scroll_down(SwkWindow *w) {
 	SwkBox *b = w->boxes;
 	for(; b->cb; b++)
-		if (b->r.w==-1 && b->r.h==-1 && ((int)(size_t)b->data)<0) {
+		if(b->r.w==-1 && b->r.h==-1 && ((int)(size_t)b->data)<0) {
 			b->scroll--;
 			return;
 		}
@@ -114,7 +114,7 @@ countrows(SwkBox *b) {
 	int row = 0;
 	for(; b->cb; b++) {
 		if(b->r.w==-1&&b->r.h==-1)
-			if ((int)(size_t)b->data>0)
+			if((int)(size_t)b->data>0)
 				row += (int)(size_t)b->data;
 	}
 	return row+7; // hacky
@@ -166,14 +166,14 @@ swk_handle_event(SwkEvent *e) {
 	switch(e->type) {
 	case EKey:
 		for(i=0; keys[i].cb; i++) {
-			if (e->data.key.modmask == keys[i].modmask
+			if(e->data.key.modmask == keys[i].modmask
 			&&  e->data.key.keycode == keys[i].keycode) {
 				keys[i].cb(e->win);
 				break;
 			}
 		}
 		/* XXX: this must be implemented in app? */
-		if (e->data.key.keycode==27) {
+		if(e->data.key.keycode==27) {
 			e->box = e->win->box;
 			e->type = EQuit;
 			swk_exit(e->win);
@@ -196,13 +196,23 @@ swk_handle_event(SwkEvent *e) {
 		}
 		break;
 	case EClick:
-		for(b=e->win->boxes; b->cb; b++) {
-			if(SWK_HIT(b->r, e->data.click.point)) {
-				e->box = e->win->box = b;
-				e->box->cb(e);
-				swk_update(e->win);
+		// TODO: do this needs to be in config.h?
+		switch(e->data.click.button) {
+		case 4:
+			swk_scroll_up(e->win);
+			break;
+		case 5:
+			swk_scroll_down(e->win);
+			break;
+		default:
+			for(b=e->win->boxes; b->cb; b++) {
+				if(SWK_HIT(b->r, e->data.click.point)) {
+					e->box = e->win->box = b;
+					e->box->cb(e);
+				}
 			}
 		}
+		swk_update(e->win);
 		break;
 	case EExpose:
 		swk_update(e->win);
@@ -282,7 +292,7 @@ swk_password(SwkEvent *e) {
 		if(e->win->box == e->box)
 			swk_gi_line(r.x, r.y+1, r.w, 0, ColorHI);
 		len = strlen(e->box->text);
-		if (len>0) {
+		if(len>0) {
 			ptr = str = malloc(len+1);
 			for(;len--;ptr++)
 				*ptr='*';
@@ -358,8 +368,8 @@ swk_option(SwkEvent *e) {
 	SwkBox **b = (SwkBox**)e->box->data;
 	switch(e->type) {
 	case EClick:
-		if (b==(void*)0) e->box->data = (void*)1;
-		else if (b==(void*)1) e->box->data = (void*)0;
+		if(b==(void*)0) e->box->data = (void*)1;
+		else if(b==(void*)1) e->box->data = (void*)0;
 		else *b = (e->box==*b)?NULL:e->box;
 		break;
 	case EExpose:
@@ -367,9 +377,9 @@ swk_option(SwkEvent *e) {
 		if(e->win->box == e->box)
 			swk_gi_line(r.x, r.y+1, r.w, 0, ColorHI);
 		r.w = r.h = 1;
-		if (b==(void*)1) swk_gi_fill(r, ColorHI, 1);
-		else if (b==(void*)0) swk_gi_fill(r, ColorFG, 1);
-		else if (e->box==*b) swk_gi_fill(r, ColorHI, 1);
+		if(b==(void*)1) swk_gi_fill(r, ColorHI, 1);
+		else if(b==(void*)0) swk_gi_fill(r, ColorFG, 1);
+		else if(e->box==*b) swk_gi_fill(r, ColorHI, 1);
 		else swk_gi_fill(r, ColorFG, 1);
 		r = e->box->r;
 		r.x += 2;
@@ -410,10 +420,10 @@ swk_progress(SwkEvent *e) {
 		r.x += len*0.8;
 		r.w -= len*0.6;
 		pc = atoi(e->box->text);
-		if (pc<0) pc = 0;
-		else if (pc>100) pc = 100;
+		if(pc<0) pc = 0;
+		else if(pc>100) pc = 100;
 		r.w = (int)((float)r.w*((float)pc/100));
-		if (r.w>0)
+		if(r.w>0)
 			swk_gi_fill(r, ColorFG, 1);
 		break;
 	default:

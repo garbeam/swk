@@ -13,10 +13,10 @@ static void mybutton_about(SwkEvent *e);
 static void mybutton_about_ok(SwkEvent *e);
 
 static void mybutton(SwkEvent *e) {
-	if (e->type == EClick) {
+	if(e->type == EClick) {
 		sprintf(text, "Do it again %d times\n", count);
 		helloworld[0].text = text;
-		if (opt == NULL)
+		if(opt == NULL)
 			printf("Option: none\n");
 		else printf("Option: %s\n", opt->text);
 		if(count-- == 0)
@@ -26,15 +26,15 @@ static void mybutton(SwkEvent *e) {
 }
 
 static void myprogressbutton(SwkEvent *e) {
-	if (e->type == EClick) {
+	if(e->type == EClick) {
 		pccount+=15;
-		sprintf(pctext, "%d%%", pccount);
-		about[10].text = pctext;
 		if(pccount > 100) {
 			pccount = 0;
 			e->win->boxes = helloworld;
 			swk_update(e->win);
 		}
+		sprintf(pctext, "%d%%", pccount);
+		about[10].text = pctext;
 	}
 	swk_button(e);
 }
@@ -63,7 +63,7 @@ static SwkBox about[] = {
 };
 
 static void mybutton_about_ok(SwkEvent *e) {
-	if (e->type == EClick) {
+	if(e->type == EClick) {
 		e->win->boxes = helloworld;
 		swk_update(e->win);
 	}
@@ -71,7 +71,7 @@ static void mybutton_about_ok(SwkEvent *e) {
 }
 
 static void mybutton_about(SwkEvent *e) {
-	if (e->type == EClick) {
+	if(e->type == EClick) {
 		e->win->boxes = about;
 		swk_update(e->win);
 	}

@@ -25,7 +25,7 @@ static void putpixel(int x, int y, Uint32 pixel) {
 	delta = y * screen->pitch + x * bpp;
 	p = (Uint8 *)screen->pixels + delta;
 	pend = (Uint8 *)screen->pixels + ((screen->h*screen->w)*bpp);
-	if ((p<((Uint8 *)screen->pixels)) || (p>=pend))
+	if((p<((Uint8 *)screen->pixels)) || (p>=pend))
 		return;
 #if BPP == 8
 	*p = pixel; 
@@ -54,7 +54,7 @@ swk_gi_fontsize(int sz) {
 		fprintf(stderr, "Cannot open font '%s'\n", FONTNAME);
 		return 0;
 	} else
-	if (FONTBOLD)
+	if(FONTBOLD)
 		TTF_SetFontStyle(font, TTF_STYLE_BOLD);
 	return 1;
 }
@@ -83,7 +83,7 @@ swk_gi_init(SwkWindow *w) {
 int
 swk_gi_update(SwkWindow *w) {
 	screen = SDL_GetVideoSurface();
-	if (screen == NULL)
+	if(screen == NULL)
 		return 0;
 	w->r.w = (screen->w / fs)-1;
 	w->r.h = (screen->h / fs)-1;
@@ -203,7 +203,7 @@ swk_gi_line(int x1, int y1, int x2, int y2, int color) {
 void
 swk_gi_fill(Rect r, int color, int lil) {
 	SDL_Rect area = { r.x*fs, r.y*fs, r.w*fs, r.h*fs };
-	if (lil) {
+	if(lil) {
 		const int s = fs/4;
 		area.x += s;
 		area.y += s;
@@ -226,7 +226,7 @@ swk_gi_text(Rect r, const char *text) {
 	char *ptr = NULL;
 	int len = strlen(text);
 	int w = (int)((double)r.w * 1.6); // hacky
-	if (len>w) {
+	if(len>w) {
 		ptr = strdup(text);
 		text = (const char *)ptr;
 		ptr[w] = '\0';
