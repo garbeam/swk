@@ -100,6 +100,7 @@ void swk_password(SwkEvent *e);
 void swk_filler(SwkEvent *e);
 void swk_option(SwkEvent *e);
 void swk_separator(SwkEvent *e);
+void swk_progress(SwkEvent *e);
 
 /* graphic backend */
 

@@ -32,9 +32,9 @@ swk_update(SwkWindow *w) {
 		roy = oy = 0;
 		for(;b->cb; b++) {
 			w->_e.box = b;
-			if (b->r.w==-1 && b->r.h==-1 && ((int)(size_t)b->data)<0)
+			if(b->r.w==-1 && b->r.h==-1 && ((int)(size_t)b->data)<0)
 				roy = oy+1;
-			if (roy && b->r.y < roy)
+			if(roy && b->r.y < roy)
 				swk_gi_line(0, roy, w->r.w, 0, ColorHI);
 			else b->cb(&w->_e);
 			oy = b->r.y;
@@ -114,10 +114,10 @@ countrows(SwkBox *b) {
 	int row = 0;
 	for(; b->cb; b++) {
 		if(b->r.w==-1&&b->r.h==-1)
-			row += (int)(size_t)b->data;
-		else row += b->r.h;
+			if ((int)(size_t)b->data>0)
+				row += (int)(size_t)b->data;
 	}
-	return (1+row) * 0.7; // hacky
+	return row+7; // hacky
 }
 
 void
@@ -389,6 +389,32 @@ swk_separator(SwkEvent *e) {
 		if(e->win->box == e->box)
 			swk_gi_line(r.x, r.y+1, r.w, 0, ColorHI);
 		else swk_gi_line(r.x, r.y+1, r.w, 0, ColorFG);
+		break;
+	default:
+		break;
+	}
+}
+
+void
+swk_progress(SwkEvent *e) {
+	int pc, len;
+	Rect r;
+	switch(e->type) {
+	case EExpose:
+		r = e->box->r;
+		r.x+=1;
+		swk_gi_text(r, e->box->text);
+		r.x-=1;
+		swk_gi_rect(r, ColorFG);
+		len = strlen(e->box->text)+2;
+		r.x += len*0.8;
+		r.w -= len*0.6;
+		pc = atoi(e->box->text);
+		if (pc<0) pc = 0;
+		else if (pc>100) pc = 100;
+		r.w = (int)((float)r.w*((float)pc/100));
+		if (r.w>0)
+			swk_gi_fill(r, ColorFG, 1);
 		break;
 	default:
 		break;

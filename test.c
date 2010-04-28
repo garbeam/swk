@@ -2,8 +2,11 @@
 #include "swk.h"
 
 static int count = 3;
+static int pccount = 0;
 static char text[64];
+static char pctext[64];
 static SwkBox helloworld[];
+static SwkBox about[];
 static SwkBox *opt = NULL;
 static void mybutton(SwkEvent *e);
 static void mybutton_about(SwkEvent *e);
@@ -22,19 +25,38 @@ static void mybutton(SwkEvent *e) {
 	swk_button(e);
 }
 
+static void myprogressbutton(SwkEvent *e) {
+	if (e->type == EClick) {
+		pccount+=15;
+		sprintf(pctext, "%d%%", pccount);
+		about[10].text = pctext;
+		if(pccount > 100) {
+			pccount = 0;
+			e->win->boxes = helloworld;
+			swk_update(e->win);
+		}
+	}
+	swk_button(e);
+}
+
 static SwkBox about[] = {
 	{ .cb=swk_label, .text="About this program...", },
 	SWK_BOX_NEWLINE(1),
 	{ .cb=swk_separator },
 	SWK_BOX_NEWLINE(2),
 	{ .cb=swk_label, .text="This is a test program for swk" },
-#if 0
 	SWK_BOX_NEWLINE(1),
 	{ .cb=swk_label, .text=" ... a simple widget kit " },
 	SWK_BOX_NEWLINE(1),
 	{ .cb=swk_label, .text="    ... from the suckless.org project" },
-#endif
-	SWK_BOX_NEWLINE(-1),
+	SWK_BOX_NEWLINE(2),
+	{ .cb=swk_progress, .text="0%", },
+	SWK_BOX_NEWLINE(1),
+	{ .cb=swk_filler },
+	{ .cb=myprogressbutton, .text="next", },
+	{ .cb=swk_filler },
+	 SWK_BOX_NEWLINE(-1),
+	//SWK_BOX_NEWLINE(3),
 	{ .cb=swk_filler },
 	{ .cb=mybutton_about_ok, .text="Ok" },
 	{ .cb=NULL }
