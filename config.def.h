@@ -4,7 +4,7 @@
 #ifdef N900
 #define FONTSIZE 32
 #else
-#define FONTSIZE 14
+#define FONTSIZE 28
 #endif
 
 /* appearance */
@@ -17,8 +17,8 @@
 //#define SWK_COLOR(r,g,b) r##g##b
 
 #define HICOLOR SWK_COLOR(0,66,ff)
+#define BGCOLOR SWK_COLOR(20,20,20)
 #define FGCOLOR SWK_COLOR(e0,e0,e0)
-#define BGCOLOR SWK_COLOR(00,00,00)
 #define TFCOLOR SWK_COLOR(cc,cc,cc)
 
 /* key bindings */
@@ -31,7 +31,7 @@ static SwkKeyBind keys[] = {
 	{ Ctrl, 10 , swk_focus_next },
 	{ Ctrl, 11 , swk_focus_prev },
 	{ Ctrl, 12 , swk_focus_activate },
-	{ 0, 225, swk_focus_activate }, // n900 enter
+	{   0, 225, swk_focus_activate }, // n900 enter
 	{   0 , KUp, swk_focus_prev },
 	{   0 , KDown, swk_focus_next },
 	{   0 , 13 , swk_focus_activate },

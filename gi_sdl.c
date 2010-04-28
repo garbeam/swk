@@ -264,7 +264,6 @@ swk_gi_text(Rect r, const char *text) {
 }
 
 /* images */
-
 void
 swk_gi_img(Rect r, void *img) {
 	SDL_Surface *s = (SDL_Surface*)img;
@@ -277,9 +276,9 @@ swk_gi_img_load(const char *str) {
 	return IMG_Load(str);
 }
 
-void*
-swk_gi_img_free(const char *str) {
-	return IMG_Load(str);
+void
+swk_gi_img_free(void *s) {
+	SDL_FreeSurface(s);
 }
 
 void

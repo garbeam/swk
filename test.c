@@ -40,7 +40,7 @@ static void myprogressbutton(SwkEvent *e) {
 }
 
 static SwkBox about[] = {
-	 SWK_BOX_NEWLINE(-1),
+	SWK_BOX_NEWLINE(0),
 	{ .cb=swk_label, .text="About this program...", },
 	SWK_BOX_NEWLINE(1),
 	{ .cb=swk_separator },

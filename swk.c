@@ -290,6 +290,7 @@ swk_label(SwkEvent *e) {
 		r = e->box->r;
 		r.w+=6;
 		swk_gi_text(r, e->box->text);
+		r.w-=6;
 		if(e->win->box == e->box)
 			swk_gi_line(r.x, r.y+1, r.w, 0, ColorHI);
 		break;

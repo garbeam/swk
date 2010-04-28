@@ -125,6 +125,6 @@ void swk_gi_text(Rect r, const char *text);
 /* images */
 void swk_gi_img(Rect r, void *img);
 void* swk_gi_img_load(const char *str);
-void* swk_gi_img_free(const char *str);
+void swk_gi_img_free(void *s);
 void swk_gi_img_set(void *img, int x, int y, int color);
 int swk_gi_img_get(void *img, int x, int y);
