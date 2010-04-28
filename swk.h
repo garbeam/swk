@@ -62,6 +62,7 @@ struct SwkBox {
 	SwkEventCallback cb;
 	char *text;
 	void *data;
+	int scroll;
 };
 
 struct SwkWindow {
@@ -87,6 +88,10 @@ void swk_focus_first(SwkWindow *w);
 void swk_focus_next(SwkWindow *w);
 void swk_focus_prev(SwkWindow *w);
 void swk_focus_activate(SwkWindow *w);
+void swk_scroll_up(SwkWindow *w);
+void swk_scroll_down(SwkWindow *w);
+void swk_fontsize_increase(SwkWindow *w);
+void swk_fontsize_decrease(SwkWindow *w);
 
 void swk_button(SwkEvent *e);
 void swk_label(SwkEvent *e);
@@ -103,6 +108,7 @@ void swk_gi_exit();
 SwkEvent *swk_gi_event(SwkWindow *w, int dowait);
 int swk_gi_update(SwkWindow *w);
 int swk_gi_has_event(SwkWindow *w);
+int swk_gi_fontsize(int sz);
 
 /* FIXME: don't these need SwkWindow *w state, to avoid static'ness? */
 void swk_gi_clear();

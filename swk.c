@@ -23,14 +23,21 @@ swk_init(SwkWindow *w) {
 
 void
 swk_update(SwkWindow *w) {
+	int roy, oy, skip = 0;
 	w->_e.type = EExpose;
 	if(swk_gi_update(w)) {
 		SwkBox *b = w->boxes;
 		swk_fit(w);
 		swk_gi_clear();
+		roy = oy = 0;
 		for(;b->cb; b++) {
 			w->_e.box = b;
-			b->cb(&w->_e);
+			if (b->r.w==-1 && b->r.h==-1 && ((int)(size_t)b->data)<0)
+				roy = oy+1;
+			if (roy && b->r.y < roy)
+				swk_gi_line(0, roy, w->r.w, 0, ColorHI);
+			else b->cb(&w->_e);
+			oy = b->r.y;
 		}
 		swk_gi_flip();
 	} else w->running = 0;
@@ -48,6 +55,40 @@ swk_loop(SwkWindow *w) {
 		if((e = swk_next_event(w)))
 			swk_handle_event(e);
 	} while(!e || e->type != EQuit);
+}
+
+void
+swk_fontsize_increase(SwkWindow *w) {
+	swk_gi_fontsize(1);
+	swk_update(w);
+}
+
+void
+swk_fontsize_decrease(SwkWindow *w) {
+	swk_gi_fontsize(-1);
+	swk_update(w);
+}
+
+void
+swk_scroll_up(SwkWindow *w) {
+	SwkBox *b = w->boxes;
+	for(; b->cb; b++)
+		if (b->r.w==-1 && b->r.h==-1 && ((int)(size_t)b->data)<0) {
+			b->scroll++;
+			return;
+		}
+	fprintf(stderr, "Cannot scroll. no vfiller\n");
+}
+
+void
+swk_scroll_down(SwkWindow *w) {
+	SwkBox *b = w->boxes;
+	for(; b->cb; b++)
+		if (b->r.w==-1 && b->r.h==-1 && ((int)(size_t)b->data)<0) {
+			b->scroll--;
+			return;
+		}
+	fprintf(stderr, "Cannot scroll. no vfiller\n");
 }
 
 static void swk_fit_row(SwkWindow *w, SwkBox *a, SwkBox *b, int y) {
@@ -76,28 +117,24 @@ countrows(SwkBox *b) {
 			row += (int)(size_t)b->data;
 		else row += b->r.h;
 	}
-	return row;
+	return (1+row) * 0.7; // hacky
 }
 
 void
 swk_fit(SwkWindow *w) {
-	int x, yi, y = 0;
+	int skip = 0;
+	int x, y = 0;
 	SwkBox *b, *b2;
 	for(b=b2=w->boxes; b->cb; b++) {
 		if(b->r.w==-1 && b->r.h==-1) {
 			x = (int)(size_t)b->data;
-			if (x>0) {
-				swk_fit_row(w, b2, b, y);
-				y += (int)(size_t)b->data;
-				b2 = b+1;
-			} else {
-				swk_fit_row(w, b2, b, y);
-				b2 = b+1;
-				yi = (w->r.h-countrows(b2));
-				if (yi<2) y += 2;
-				else y += yi;
-			}
+			swk_fit_row(w, b2, b, y);
+			y+=x-skip+b->scroll;
+			// vertical align //
+			if(x<0) y+=(w->r.h-countrows(b2));
+			b2 = b+1;
 		}
+		// printf ("%d %d\n", y, b->scroll);
 	}
 	swk_fit_row(w, b2, b, y);
 }

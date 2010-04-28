@@ -1,5 +1,12 @@
 /* See LICENSE file for copyright and license details. */
 
+//#define N900
+#ifdef N900
+#define FONTSIZE 32
+#else
+#define FONTSIZE 14
+#endif
+
 /* appearance */
 #define FONTSIZE 14
 #define FONTBOLD 1
@@ -29,5 +36,9 @@ static SwkKeyBind keys[] = {
 	{   0 , KDown, swk_focus_next },
 	{   0 , 13 , swk_focus_activate },
 	{ Ctrl, 12 , swk_focus_activate },
+	{ Ctrl, 10, swk_scroll_up },
+	{ Ctrl, 11, swk_scroll_down },
+	{ Ctrl, '+', swk_fontsize_increase },
+	{ Ctrl, '-', swk_fontsize_decrease },
 	{ 0 }
 };

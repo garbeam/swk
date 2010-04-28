@@ -26,7 +26,14 @@ static SwkBox about[] = {
 	{ .cb=swk_label, .text="About this program...", },
 	SWK_BOX_NEWLINE(1),
 	{ .cb=swk_separator },
-	{ .cb=swk_label, .text="This program aims to be\nfor hackers\nand developers\n" },
+	SWK_BOX_NEWLINE(2),
+	{ .cb=swk_label, .text="This is a test program for swk" },
+#if 0
+	SWK_BOX_NEWLINE(1),
+	{ .cb=swk_label, .text=" ... a simple widget kit " },
+	SWK_BOX_NEWLINE(1),
+	{ .cb=swk_label, .text="    ... from the suckless.org project" },
+#endif
 	SWK_BOX_NEWLINE(-1),
 	{ .cb=swk_filler },
 	{ .cb=mybutton_about_ok, .text="Ok" },
@@ -70,7 +77,7 @@ static SwkBox helloworld[] = {
 //	{ .cb=swk_option, .text="null" },
 	SWK_BOX_NEWLINE(1),
 	{ .cb=swk_option, .text="pasta barata", .data=&opt },
-	SWK_BOX_NEWLINE(5),
+	SWK_BOX_NEWLINE(2),
 	{ .cb=swk_label, .text="--swktest", },
 	{ .cb=mybutton_about, .text="about" },
 	{ .cb=NULL }

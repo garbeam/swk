@@ -6,10 +6,10 @@
 #include "config.h"
 
 #define FONTNAME "Inconsolata.otf"
-#define FS FONTSIZE
 #define BPP 32
 #define SDLFLAGS SDL_DOUBLEBUF|SDL_RESIZABLE
 
+static int fs = FONTSIZE;
 static Uint32 pal[ColorLast];
 static SDL_Color fontcolor = { TFCOLOR };
 static SDL_Color bgcolor = { BGCOLOR };
@@ -47,6 +47,19 @@ static void putpixel(int x, int y, Uint32 pixel) {
 }
 
 int
+swk_gi_fontsize(int sz) {
+	fs += sz*2;
+	font = TTF_OpenFont(FONTNAME, fs); 
+	if(font == NULL) {
+		fprintf(stderr, "Cannot open font '%s'\n", FONTNAME);
+		return 0;
+	} else
+	if (FONTBOLD)
+		TTF_SetFontStyle(font, TTF_STYLE_BOLD);
+	return 1;
+}
+
+int
 swk_gi_init(SwkWindow *w) {
 	if(SDL_Init(SDL_INIT_VIDEO)) {
 		fprintf(stderr, "Cannot initialize SDL\n");
@@ -64,14 +77,7 @@ swk_gi_init(SwkWindow *w) {
 	pal[ColorFG] = SDL_MapRGB(screen->format, FGCOLOR);
 	pal[ColorBG] = SDL_MapRGB(screen->format, BGCOLOR);
 	pal[ColorHI] = SDL_MapRGB(screen->format, HICOLOR);
-	font = TTF_OpenFont(FONTNAME, FS); 
-	if(font == NULL) {
-		fprintf(stderr, "Cannot open font '%s'\n", FONTNAME);
-		return 0;
-	} else
-	if (FONTBOLD)
-		TTF_SetFontStyle(font, TTF_STYLE_BOLD);
-	return 1;
+	return swk_gi_fontsize(0);
 }
 
 int
@@ -79,8 +85,8 @@ swk_gi_update(SwkWindow *w) {
 	screen = SDL_GetVideoSurface();
 	if (screen == NULL)
 		return 0;
-	w->r.w = (screen->w / FS)-1;
-	w->r.h = (screen->h / FS)-1;
+	w->r.w = (screen->w / fs)-1;
+	w->r.h = (screen->h / fs)-1;
 	return 1;
 }
 
@@ -118,16 +124,16 @@ swk_gi_event(SwkWindow *w, int dowait) {
 		break;
 	case SDL_MOUSEMOTION:
 		ret->type = EMotion;
-		ret->data.motion.x = event.motion.x / FS;
-		ret->data.motion.y = event.motion.y / FS;
+		ret->data.motion.x = event.motion.x / fs;
+		ret->data.motion.y = event.motion.y / fs;
 	//	fprintf(stderr, "event: motion %d %d\n",
 	//		event.motion.x, event.motion.y);
 		break;
 	case SDL_MOUSEBUTTONDOWN:
 		ret->type = EClick;
 		ret->data.click.button = event.button.button;
-		ret->data.click.point.x = event.button.x / FS;
-		ret->data.click.point.y = event.button.y / FS;
+		ret->data.click.point.x = event.button.x / fs;
+		ret->data.click.point.y = event.button.y / fs;
 		fprintf(stderr, "event: click %d\n", event.button.button);
 		break;
 	case SDL_KEYDOWN:
@@ -148,9 +154,11 @@ swk_gi_event(SwkWindow *w, int dowait) {
 		} else {
 			// TODO key aliases defined in config.h
 			switch(event.key.keysym.sym) {
+			case 1073741906: // n900 up key
 			case 273:
 				ret->data.key.keycode = KUp;
 				break;
+			case 1073741912: // n900 down key
 			case 274:
 				ret->data.key.keycode = KDown;
 				break;
@@ -185,8 +193,8 @@ swk_gi_flip() {
 void
 swk_gi_line(int x1, int y1, int x2, int y2, int color) {
 	int i;
-	x1 *= FS; y1 *= FS;
-	x2 *= FS; y2 *= FS;
+	x1 *= fs; y1 *= fs;
+	x2 *= fs; y2 *= fs;
 	if(x2==0) for(i=0;i<y2;i++) putpixel(x1, y1+i, pal[color]);
 	else
 	if(y2==0) for(i=0;i<x2;i++) putpixel(x1+i, y1, pal[color]);
@@ -194,9 +202,9 @@ swk_gi_line(int x1, int y1, int x2, int y2, int color) {
 
 void
 swk_gi_fill(Rect r, int color, int lil) {
-	SDL_Rect area = { r.x*FS, r.y*FS, r.w*FS, r.h*FS };
+	SDL_Rect area = { r.x*fs, r.y*fs, r.w*fs, r.h*fs };
 	if (lil) {
-		const int s = FS/4;
+		const int s = fs/4;
 		area.x += s;
 		area.y += s;
 		area.w -= (s*2);
@@ -226,7 +234,7 @@ swk_gi_text(Rect r, const char *text) {
 	if(*text) {
 		SDL_Surface *ts = TTF_RenderText_Shaded(font, text, fontcolor, bgcolor);
 		if(ts) {
-			SDL_Rect to = { (r.x)*FS, r.y*FS, ts->w, ts->h };
+			SDL_Rect to = { (r.x)*fs, r.y*fs, ts->w, ts->h };
 			SDL_BlitSurface(ts, NULL, screen, &to);
 			SDL_FreeSurface(ts);
 		} else fprintf(stderr, "Cannot render string (%s)\n", text);
