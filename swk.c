@@ -161,6 +161,8 @@ void
 swk_handle_event(SwkEvent *e) {
 	int i;
 	SwkBox *b;
+	if(e->win->cb)
+		e->win->cb(e);
 	switch(e->type) {
 	case EKey:
 		for(i=0; keys[i].cb; i++) {
@@ -422,6 +424,32 @@ swk_progress(SwkEvent *e) {
 		r.w = (int)((float)r.w*((float)pc/100));
 		if(r.w>0)
 			swk_gi_fill(r, ColorFG, 1);
+		break;
+	default:
+		break;
+	}
+}
+
+/* -- */
+void
+swk_image_free(SwkBox *b) {
+	swk_gi_img_free(b->data);
+	b->data = NULL;
+}
+
+void
+swk_image(SwkEvent *e) {
+	if(e->box->data == NULL)
+		e->box->data = swk_gi_img_load(e->box->text);
+	switch(e->type) {
+	case EExpose:
+		if (e->box->data)
+			swk_gi_img(e->box->r, e->box->data);
+		else swk_gi_rect(e->box->r, ColorFG);
+		if(e->win->box == e->box) {
+			Rect r = e->box->r;
+			swk_gi_line(r.x, r.y+1, r.w, 0, ColorHI);
+		}
 		break;
 	default:
 		break;

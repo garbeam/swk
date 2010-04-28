@@ -8,7 +8,6 @@
 #endif
 
 /* appearance */
-#define FONTSIZE 40
 #define FONTBOLD 1
 #define WINWIDTH 640
 #define WINHEIGHT 480

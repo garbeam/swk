@@ -1,6 +1,7 @@
 /* See LICENSE file for copyright and license details. */
 #define _BSD_SOURCE // strdup
 #include <SDL/SDL.h>
+#include <SDL/SDL_image.h>
 #include <SDL/SDL_ttf.h>
 #include "swk.h"
 #include "config.h"
@@ -19,13 +20,13 @@ static TTF_Font *font = NULL;
 static int has_event = 0;
 static SDL_Event lastev = { .type=-1 };
 
-static void putpixel(int x, int y, Uint32 pixel) { 
+static void putpixel(SDL_Surface *scr, int x, int y, Uint32 pixel) { 
 	Uint8 *p, *pend;
-	int delta, bpp = screen->format->BytesPerPixel;
-	delta = y * screen->pitch + x * bpp;
-	p = (Uint8 *)screen->pixels + delta;
-	pend = (Uint8 *)screen->pixels + (screen->h*screen->w*bpp);
-	if((p<((Uint8 *)screen->pixels)) || (p>=pend))
+	int delta, bpp = scr->format->BytesPerPixel;
+	delta = y * scr->pitch + x * bpp;
+	p = (Uint8 *)scr->pixels + delta;
+	pend = (Uint8 *)scr->pixels + (scr->h*scr->w*bpp);
+	if((p<((Uint8 *)scr->pixels)) || (p>=pend))
 		return;
 #if BPP == 8
 	*p = pixel; 
@@ -209,9 +210,9 @@ swk_gi_line(int x1, int y1, int x2, int y2, int color) {
 	int i;
 	x1 *= fs; y1 *= fs;
 	x2 *= fs; y2 *= fs;
-	if(x2==0) for(i=0;i<y2;i++) putpixel(x1, y1+i, pal[color]);
+	if(x2==0) for(i=0;i<y2;i++) putpixel(screen, x1, y1+i, pal[color]);
 	else
-	if(y2==0) for(i=0;i<x2;i++) putpixel(x1+i, y1, pal[color]);
+	if(y2==0) for(i=0;i<x2;i++) putpixel(screen, x1+i, y1, pal[color]);
 }
 
 void
@@ -255,3 +256,35 @@ swk_gi_text(Rect r, const char *text) {
 	}
 	free(ptr);
 }
+
+/* images */
+
+void
+swk_gi_img(Rect r, void *img) {
+	SDL_Surface *s = (SDL_Surface*)img;
+	SDL_Rect area = { r.x*fs, r.y*fs, r.w*fs, r.h*fs };
+	if (s) SDL_BlitSurface(s, NULL, screen, &area);
+}
+
+void*
+swk_gi_img_load(const char *str) {
+	return IMG_Load(str);
+}
+
+void*
+swk_gi_img_free(const char *str) {
+	return IMG_Load(str);
+}
+
+void
+swk_gi_img_set(void *img, int x, int y, int color) {
+	SDL_Surface *s = (SDL_Surface*)img;
+	if (s) putpixel(s, x, y, color);
+}
+
+int
+swk_gi_img_get(void *img, int x, int y) {
+	/* TODO */
+	return 0;
+}
+

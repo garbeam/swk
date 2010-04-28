@@ -8,7 +8,7 @@ CFLAGS+=-I.
 
 # graphic backend
 GI?=sdl
-GI_LIBS=-lSDL -lSDL_ttf
+GI_LIBS=-lSDL -lSDL_ttf -lSDL_image
 
 GI_OBJS=gi_${GI}.o
 GI_SRCS=gi_${GI}.c
