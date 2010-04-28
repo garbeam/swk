@@ -23,7 +23,7 @@ swk_init(SwkWindow *w) {
 
 void
 swk_update(SwkWindow *w) {
-	int roy, oy, skip = 0;
+	int roy, oy;
 	w->_e.type = EExpose;
 	if(swk_gi_update(w)) {
 		SwkBox *b = w->boxes;
@@ -77,7 +77,7 @@ swk_scroll_up(SwkWindow *w) {
 			b->scroll++;
 			return;
 		}
-	fprintf(stderr, "Cannot scroll. no vfiller\n");
+	w->boxes->scroll++;
 }
 
 void
@@ -88,7 +88,7 @@ swk_scroll_down(SwkWindow *w) {
 			b->scroll--;
 			return;
 		}
-	fprintf(stderr, "Cannot scroll. no vfiller\n");
+	w->boxes->scroll--;
 }
 
 static void swk_fit_row(SwkWindow *w, SwkBox *a, SwkBox *b, int y) {
@@ -129,12 +129,12 @@ swk_fit(SwkWindow *w) {
 		if(b->r.w==-1 && b->r.h==-1) {
 			x = (int)(size_t)b->data;
 			swk_fit_row(w, b2, b, y);
-			y+=x-skip+b->scroll;
+			y += x-skip;
 			// vertical align //
 			if(x<0) y+=(w->r.h-countrows(b2));
 			b2 = b+1;
 		}
-		// printf ("%d %d\n", y, b->scroll);
+		y += b->scroll;
 	}
 	swk_fit_row(w, b2, b, y);
 }
