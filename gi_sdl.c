@@ -70,7 +70,6 @@ swk_gi_init(SwkWindow *w) {
 		fprintf(stderr, "Cannot initialize TTF: %s\n", TTF_GetError());
 		return 0;
 	}
-	SDL_VideoInit(NULL, 0);
 	SDL_SetVideoMode(w->r.w, w->r.h, BPP, SDLFLAGS);
 	// double init is necesary to get window size
 	SDL_SetVideoMode(w->r.w, w->r.h, BPP, SDLFLAGS);
@@ -132,9 +131,11 @@ swk_gi_event(SwkWindow *w, int dowait) {
 			if(event.motion.y>mousedowny+fs) {
 				mousedowny = event.motion.y;
 				swk_scroll_up(w);
+				swk_scroll_up(w);
 			} else
 			if(event.motion.y<mousedowny-fs) {
 				mousedowny = event.motion.y;
+				swk_scroll_down(w);
 				swk_scroll_down(w);
 			}
 		} else {
@@ -148,7 +149,7 @@ swk_gi_event(SwkWindow *w, int dowait) {
 		break;
 	case SDL_MOUSEBUTTONDOWN:
 		mousedown = 1;
-		mousedowny = event.motion.y;
+		mousedowny = event.button.y;
 		fprintf(stderr, "event: click %d\n", event.button.button);
 		ret->type = EClick;
 		ret->data.click.button = event.button.button;
