@@ -114,10 +114,10 @@ swk_gi_event(SwkWindow *w, int dowait) {
 	if(has_event);
 	switch(event.type) {
 	default: ret = NULL; break;
-	case SDL_ACTIVEEVENT:
 	case SDL_VIDEORESIZE:
 		fprintf(stderr, "resize %d %d\n", event.resize.w, event.resize.h);
 		SDL_SetVideoMode(event.resize.w, event.resize.h, BPP, SDLFLAGS);
+	case SDL_ACTIVEEVENT:
 	case SDL_VIDEOEXPOSE:
 		ret->type = EExpose;
 		ret->data.expose.x = ret->data.expose.y = \

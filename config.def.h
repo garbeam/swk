@@ -8,7 +8,7 @@
 #endif
 
 /* appearance */
-#define FONTSIZE 14
+#define FONTSIZE 40
 #define FONTBOLD 1
 #define WINWIDTH 640
 #define WINHEIGHT 480
@@ -32,12 +32,13 @@ static SwkKeyBind keys[] = {
 	{ Ctrl, 10 , swk_focus_next },
 	{ Ctrl, 11 , swk_focus_prev },
 	{ Ctrl, 12 , swk_focus_activate },
+	{ 0, 225, swk_focus_activate }, // n900 enter
 	{   0 , KUp, swk_focus_prev },
 	{   0 , KDown, swk_focus_next },
 	{   0 , 13 , swk_focus_activate },
 	{ Ctrl, 12 , swk_focus_activate },
-	{ Ctrl, 10, swk_scroll_up },
-	{ Ctrl, 11, swk_scroll_down },
+	{ Ctrl|Shift, 10, swk_scroll_down },
+	{ Ctrl|Shift, 11, swk_scroll_up },
 	{ Ctrl, '+', swk_fontsize_increase },
 	{ Ctrl, '-', swk_fontsize_decrease },
 	{ 0 }
