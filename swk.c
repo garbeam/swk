@@ -69,26 +69,24 @@ swk_fontsize_decrease(SwkWindow *w) {
 	swk_update(w);
 }
 
-void
-swk_scroll_up(SwkWindow *w) {
+
+static SwkBox *
+getscrollbox(SwkWindow *w) {
 	SwkBox *b = w->boxes;
 	for(; b->cb; b++)
-		if(b->r.w==-1 && b->r.h==-1 && ((int)(size_t)b->data)<0) {
-			b->scroll++;
-			return;
-		}
-	w->boxes->scroll++;
+		if(b->r.w==-1 && b->r.h==-1 && ((int)(size_t)b->data)<0)
+			return b;
+	return w->boxes;
+}
+
+void
+swk_scroll_up(SwkWindow *w) {
+	getscrollbox(w)->scroll++;
 }
 
 void
 swk_scroll_down(SwkWindow *w) {
-	SwkBox *b = w->boxes;
-	for(; b->cb; b++)
-		if(b->r.w==-1 && b->r.h==-1 && ((int)(size_t)b->data)<0) {
-			b->scroll--;
-			return;
-		}
-	w->boxes->scroll--;
+	getscrollbox(w)->scroll--;
 }
 
 static void swk_fit_row(SwkWindow *w, SwkBox *a, SwkBox *b, int y) {
@@ -131,7 +129,7 @@ swk_fit(SwkWindow *w) {
 			swk_fit_row(w, b2, b, y);
 			y += x-skip;
 			// vertical align //
-			if(x<0) y+=(w->r.h-countrows(b2));
+			if(x<0) y+=w->r.h-countrows(b2);
 			b2 = b+1;
 		}
 		y += b->scroll;
@@ -167,7 +165,7 @@ swk_handle_event(SwkEvent *e) {
 	case EKey:
 		for(i=0; keys[i].cb; i++) {
 			if(e->data.key.modmask == keys[i].modmask
-			&&  e->data.key.keycode == keys[i].keycode) {
+			&& e->data.key.keycode == keys[i].keycode) {
 				keys[i].cb(e->win);
 				break;
 			}
@@ -420,8 +418,7 @@ swk_progress(SwkEvent *e) {
 		r.x += len*0.8;
 		r.w -= len*0.6;
 		pc = atoi(e->box->text);
-		if(pc<0) pc = 0;
-		else if(pc>100) pc = 100;
+		if(pc<0) pc = 0; else if(pc>100) pc = 100;
 		r.w = (int)((float)r.w*((float)pc/100));
 		if(r.w>0)
 			swk_gi_fill(r, ColorFG, 1);

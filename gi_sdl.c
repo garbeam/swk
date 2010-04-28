@@ -20,11 +20,11 @@ static int has_event = 0;
 static SDL_Event lastev = { .type=-1 };
 
 static void putpixel(int x, int y, Uint32 pixel) { 
-	int delta, bpp = screen->format->BytesPerPixel;
 	Uint8 *p, *pend;
+	int delta, bpp = screen->format->BytesPerPixel;
 	delta = y * screen->pitch + x * bpp;
 	p = (Uint8 *)screen->pixels + delta;
-	pend = (Uint8 *)screen->pixels + ((screen->h*screen->w)*bpp);
+	pend = (Uint8 *)screen->pixels + (screen->h*screen->w*bpp);
 	if((p<((Uint8 *)screen->pixels)) || (p>=pend))
 		return;
 #if BPP == 8
@@ -104,6 +104,7 @@ swk_gi_has_event(SwkWindow *w) {
 
 SwkEvent *
 swk_gi_event(SwkWindow *w, int dowait) {
+	static int mousedowny, mousedown = 0;
 	SDL_Event event;
 	SwkEvent *ret = &w->_e;
 
@@ -123,18 +124,32 @@ swk_gi_event(SwkWindow *w, int dowait) {
 		ret->data.expose.w = ret->data.expose.h = 0;
 		break;
 	case SDL_MOUSEMOTION:
-		ret->type = EMotion;
-		ret->data.motion.x = event.motion.x / fs;
-		ret->data.motion.y = event.motion.y / fs;
-	//	fprintf(stderr, "event: motion %d %d\n",
-	//		event.motion.x, event.motion.y);
+		if(mousedown) {
+			if(event.motion.y>mousedowny+fs) {
+				mousedowny = event.motion.y;
+				swk_scroll_up(w);
+			} else
+			if(event.motion.y<mousedowny-fs) {
+				mousedowny = event.motion.y;
+				swk_scroll_down(w);
+			}
+		} else {
+			ret->type = EMotion;
+			ret->data.motion.x = event.motion.x / fs;
+			ret->data.motion.y = event.motion.y / fs;
+		}
+		break;
+	case SDL_MOUSEBUTTONUP:
+		mousedown = 0;
 		break;
 	case SDL_MOUSEBUTTONDOWN:
+		mousedown = 1;
+		mousedowny = event.motion.y;
+		fprintf(stderr, "event: click %d\n", event.button.button);
 		ret->type = EClick;
 		ret->data.click.button = event.button.button;
 		ret->data.click.point.x = event.button.x / fs;
 		ret->data.click.point.y = event.button.y / fs;
-		fprintf(stderr, "event: click %d\n", event.button.button);
 		break;
 	case SDL_KEYDOWN:
 		ret->data.key.modmask = 0;
@@ -169,7 +184,6 @@ swk_gi_event(SwkWindow *w, int dowait) {
 		}
 		break;
 	case SDL_QUIT:
-		fprintf(stderr, "event: quit\n");
 		ret->type = ret->type = EQuit;
 		break;
 	}
