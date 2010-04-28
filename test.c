@@ -27,19 +27,20 @@ static void mybutton(SwkEvent *e) {
 
 static void myprogressbutton(SwkEvent *e) {
 	if(e->type == EClick) {
-		pccount+=15;
+		pccount+=6;
 		if(pccount > 100) {
 			pccount = 0;
 			e->win->boxes = helloworld;
 			swk_update(e->win);
 		}
 		sprintf(pctext, "%d%%", pccount);
-		about[10].text = pctext;
+		about[11].text = pctext;
 	}
 	swk_button(e);
 }
 
 static SwkBox about[] = {
+	 SWK_BOX_NEWLINE(-1),
 	{ .cb=swk_label, .text="About this program...", },
 	SWK_BOX_NEWLINE(1),
 	{ .cb=swk_separator },

@@ -23,7 +23,9 @@ swk_init(SwkWindow *w) {
 
 void
 swk_update(SwkWindow *w) {
+	char text[8];
 	int roy, oy;
+	int scroll = 0;
 	w->_e.type = EExpose;
 	if(swk_gi_update(w)) {
 		SwkBox *b = w->boxes;
@@ -34,8 +36,18 @@ swk_update(SwkWindow *w) {
 			w->_e.box = b;
 			if(b->r.w==-1 && b->r.h==-1 && ((int)(size_t)b->data)<0)
 				roy = oy+1;
-			if(roy && b->r.y < roy)
-				swk_gi_line(0, roy, w->r.w, 0, ColorHI);
+			if (b->scroll)
+				scroll = b->scroll;
+			if(roy && b->r.y < roy) {
+				sprintf(text, "(%d)", scroll);
+				Rect r = w->r;
+				r.x = r.w-1;
+				r.y = roy;
+				r.w = 3;
+				swk_gi_text(r, text);
+				r.x--;
+				swk_gi_line(r.x, roy, r.w, 0, ColorHI);
+			}
 			else b->cb(&w->_e);
 			oy = b->r.y;
 		}
@@ -72,10 +84,14 @@ swk_fontsize_decrease(SwkWindow *w) {
 
 static SwkBox *
 getscrollbox(SwkWindow *w) {
+	SwkBox *r = NULL;
 	SwkBox *b = w->boxes;
-	for(; b->cb; b++)
+	for(; b->cb; b++) {
 		if(b->r.w==-1 && b->r.h==-1 && ((int)(size_t)b->data)<0)
-			return b;
+			r = b;
+		if(w->box==b)
+			return r?r:w->boxes;
+	}
 	return w->boxes;
 }
 
@@ -272,6 +288,7 @@ swk_label(SwkEvent *e) {
 	switch(e->type) {
 	case EExpose:
 		r = e->box->r;
+		r.w+=6;
 		swk_gi_text(r, e->box->text);
 		if(e->win->box == e->box)
 			swk_gi_line(r.x, r.y+1, r.w, 0, ColorHI);

@@ -70,6 +70,9 @@ swk_gi_init(SwkWindow *w) {
 		fprintf(stderr, "Cannot initialize TTF: %s\n", TTF_GetError());
 		return 0;
 	}
+	SDL_VideoInit(NULL, 0);
+	SDL_SetVideoMode(w->r.w, w->r.h, BPP, SDLFLAGS);
+	// double init is necesary to get window size
 	SDL_SetVideoMode(w->r.w, w->r.h, BPP, SDLFLAGS);
 	SDL_WM_SetCaption(w->title, NULL);
 	screen = SDL_GetVideoSurface();
@@ -200,7 +203,9 @@ swk_gi_clear() {
 
 void
 swk_gi_flip() {
+	SDL_LockSurface(screen);
 	SDL_UpdateRect(screen, 0, 0, screen->w, screen->h); 
+	SDL_UnlockSurface(screen);
 }
 
 /* -- drawing primitives -- */
