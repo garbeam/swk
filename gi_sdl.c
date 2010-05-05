@@ -16,34 +16,31 @@ static SDL_Color fontcolor = { TFCOLOR };
 static SDL_Color bgcolor = { BGCOLOR };
 static SDL_Surface *screen = NULL;
 static TTF_Font *font = NULL;
-/* FIXME: put ugly statics into void *aux of SwkWindow */
+/* FIXME: put ugly statics into void *aux of SwkWindow ? */
 static int has_event = 0;
 static SDL_Event lastev = { .type=-1 };
 
 static void putpixel(SDL_Surface *scr, int x, int y, Uint32 pixel) { 
-	Uint8 *p, *pend;
-	int delta, bpp = scr->format->BytesPerPixel;
-	delta = y * scr->pitch + x * bpp;
-	p = (Uint8 *)scr->pixels + delta;
-	pend = (Uint8 *)scr->pixels + (scr->h*scr->w*bpp);
+	Uint8 *p = (Uint8 *)scr->pixels + (y*scr->pitch+x*(BPP/8));
+	Uint8 *pend = (Uint8 *)scr->pixels + (scr->h*scr->w*(BPP/8));
 	if((p<((Uint8 *)scr->pixels)) || (p>=pend))
 		return;
 #if BPP == 8
-	*p = pixel; 
+	*p = pixel;
 #elif BPP == 16
 	*(Uint16 *)p = pixel; 
 #elif BPP == 24
 # if SDL_BYTEORDER == SDL_BIG_ENDIAN
-	p[0] = (pixel >> 16) & 0xff; 
-	p[1] = (pixel >> 8) & 0xff; 
-	p[2] = pixel & 0xff; 
+	p[0] = (pixel >> 16) & 0xff;
+	p[1] = (pixel >> 8) & 0xff;
+	p[2] = pixel & 0xff;
 # else
-	p[0] = pixel & 0xff; 
-	p[1] = (pixel >> 8) & 0xff; 
-	p[2] = (pixel >> 16) & 0xff; 
+	p[0] = pixel & 0xff;
+	p[1] = (pixel >> 8) & 0xff;
+	p[2] = (pixel >> 16) & 0xff;
 # endif
 #elif BPP == 32
-	*(Uint32 *)p = pixel; 
+	*(Uint32 *)p = pixel;
 #endif
 }
 
@@ -108,6 +105,7 @@ swk_gi_has_event(SwkWindow *w) {
 SwkEvent *
 swk_gi_event(SwkWindow *w, int dowait) {
 	static int mousedowny, mousedown = 0;
+	static int mousemoved = 0;
 	SDL_Event event;
 	SwkEvent *ret = &w->_e;
 
@@ -138,6 +136,9 @@ swk_gi_event(SwkWindow *w, int dowait) {
 				swk_scroll_down(w);
 				swk_scroll_down(w);
 			}
+			ret->type = EExpose;
+			ret->data.expose.x = ret->data.expose.y = \
+			ret->data.expose.w = ret->data.expose.h = 0;
 		} else {
 			ret->type = EMotion;
 			ret->data.motion.x = event.motion.x / fs;
@@ -146,15 +147,18 @@ swk_gi_event(SwkWindow *w, int dowait) {
 		break;
 	case SDL_MOUSEBUTTONUP:
 		mousedown = 0;
+		if(!mousemoved) {
+			fprintf(stderr, "event: click %d\n", event.button.button);
+			ret->type = EClick;
+			ret->data.click.button = event.button.button;
+			ret->data.click.point.x = event.button.x / fs;
+			ret->data.click.point.y = event.button.y / fs;
+		}
 		break;
 	case SDL_MOUSEBUTTONDOWN:
+		mousemoved = 0;
 		mousedown = 1;
 		mousedowny = event.button.y;
-		fprintf(stderr, "event: click %d\n", event.button.button);
-		ret->type = EClick;
-		ret->data.click.button = event.button.button;
-		ret->data.click.point.x = event.button.x / fs;
-		ret->data.click.point.y = event.button.y / fs;
 		break;
 	case SDL_KEYDOWN:
 		ret->data.key.modmask = 0;
@@ -173,7 +177,7 @@ swk_gi_event(SwkWindow *w, int dowait) {
 				ret->data.key.modmask, ret->data.key.keycode);
 		} else {
 			// TODO key aliases defined in config.h
-			switch(event.key.keysym.sym) {
+			switch((int)event.key.keysym.sym) {
 			case 1073741906: // n900 up key
 			case 273:
 				ret->data.key.keycode = KUp;
@@ -189,7 +193,7 @@ swk_gi_event(SwkWindow *w, int dowait) {
 		}
 		break;
 	case SDL_QUIT:
-		ret->type = ret->type = EQuit;
+		ret->type = EQuit;
 		break;
 	}
 	has_event = 0;
@@ -210,7 +214,6 @@ swk_gi_flip() {
 }
 
 /* -- drawing primitives -- */
-
 void
 swk_gi_line(int x1, int y1, int x2, int y2, int color) {
 	int i;
@@ -268,7 +271,7 @@ void
 swk_gi_img(Rect r, void *img) {
 	SDL_Surface *s = (SDL_Surface*)img;
 	SDL_Rect area = { r.x*fs, r.y*fs, r.w*fs, r.h*fs };
-	if (s) SDL_BlitSurface(s, NULL, screen, &area);
+	if(s) SDL_BlitSurface(s, NULL, screen, &area);
 }
 
 void*
@@ -284,7 +287,7 @@ swk_gi_img_free(void *s) {
 void
 swk_gi_img_set(void *img, int x, int y, int color) {
 	SDL_Surface *s = (SDL_Surface*)img;
-	if (s) putpixel(s, x, y, color);
+	if(s) putpixel(s, x, y, color);
 }
 
 int

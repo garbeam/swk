@@ -1,14 +1,8 @@
 /* See LICENSE file for copyright and license details. */
 
-//#define N900
-#ifdef N900
-#define FONTSIZE 32
-#else
-#define FONTSIZE 28
-#endif
-
 /* appearance */
-#define FONTBOLD 1
+#define FONTSIZE 28
+#define FONTBOLD 0
 #define WINWIDTH 640
 #define WINHEIGHT 480
 // SDL
@@ -23,22 +17,22 @@
 
 /* key bindings */
 static SwkKeyBind keys[] = {
-	{ Ctrl, 'j', swk_focus_next },
-	{ Ctrl, 'k', swk_focus_prev },
-	{ Ctrl,  8 , swk_focus_first },
-	{ Ctrl,  9 , swk_focus_prev },
-	{   0 ,  9 , swk_focus_next },
-	{ Ctrl, 10 , swk_focus_next },
-	{ Ctrl, 11 , swk_focus_prev },
-	{ Ctrl, 12 , swk_focus_activate },
-	{   0, 225, swk_focus_activate }, // n900 enter
-	{   0 , KUp, swk_focus_prev },
+	{ Ctrl, 'j',   swk_focus_next },
+	{ Ctrl, 'k',   swk_focus_prev },
+	{ Ctrl,  8 ,   swk_focus_first },
+	{ Ctrl,  9 ,   swk_focus_prev },
+	{   0 ,  9 ,   swk_focus_next },
+	{ Ctrl, 10 ,   swk_focus_next },
+	{ Ctrl, 11 ,   swk_focus_prev },
+	{ Ctrl, 12 ,   swk_focus_activate },
+	{   0, 225 ,   swk_focus_activate }, // n900 return
+	{   0 , KUp,   swk_focus_prev },
 	{   0 , KDown, swk_focus_next },
-	{   0 , 13 , swk_focus_activate },
-	{ Ctrl, 12 , swk_focus_activate },
+	{   0 , 13 ,   swk_focus_activate },
+	{ Ctrl, 12 ,   swk_focus_activate },
 	{ Ctrl|Shift, 10, swk_scroll_down },
 	{ Ctrl|Shift, 11, swk_scroll_up },
-	{ Ctrl, '+', swk_fontsize_increase },
-	{ Ctrl, '-', swk_fontsize_decrease },
+	{ Ctrl, '+',   swk_fontsize_increase },
+	{ Ctrl, '-',   swk_fontsize_decrease },
 	{ 0 }
 };

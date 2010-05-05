@@ -1,7 +1,10 @@
 SWK - simple widget kit
 =======================
-
+On ArchLinunx:
   pacman -S sdl sdl_ttf sdl_image
+
+On Debian/Ubuntu:
+  apt-get install libsdl-dev libsdl-ttf libsdl-image
 
 Usability guideline
 ===================
@@ -12,10 +15,10 @@ TODO
 * support for clipboard (implemented in gi_ backend)
 * simple way to define callback for buttons instead of reimplementing widget
 * scroll on focus
-* mouse bindings
-* allow widgets to define their boundaries to force size
-* add support to resize images
-* only focus buttons and entries
+* mouse bindings in config.h
+* allow widgets to define to force size (height, width)
+* add support to resize images (scaling)
+* only focus buttons and entries (input widgets)
 * add function to click button 1, 2, 3, ...
 * allow to load images from memory instead of files
 * default image path
