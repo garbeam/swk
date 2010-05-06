@@ -132,7 +132,10 @@ swk_gi_event(SwkWindow *w, int dowait) {
 		ret->data.expose.w = ret->data.expose.h = 0;
 		break;
 	case SDL_MOUSEMOTION:
+		//fprintf(stderr, "event: motion (%d,%d)\n", event.motion.x,event.motion.y);
 		if(mousedown) {
+			if(mousedowny==-1) // touchscreen trick
+				mousedowny = event.motion.y;
 			if(event.motion.y>mousedowny+fs) {
 				mousedowny = event.motion.y;
 				swk_scroll_up(w);
@@ -153,9 +156,10 @@ swk_gi_event(SwkWindow *w, int dowait) {
 		}
 		break;
 	case SDL_MOUSEBUTTONUP:
+		//fprintf(stderr, "event: up %d (%d,%d)\n", event.button.button,event.button.x,event.button.y);
+
 		mousedown = 0;
 		if(!mousemoved) {
-			fprintf(stderr, "event: click %d\n", event.button.button);
 			ret->type = EClick;
 			ret->data.click.button = event.button.button;
 			ret->data.click.point.x = event.button.x / fs;
@@ -163,9 +167,10 @@ swk_gi_event(SwkWindow *w, int dowait) {
 		}
 		break;
 	case SDL_MOUSEBUTTONDOWN:
+		//fprintf(stderr, "event: down %d (%d,%d)\n", event.button.button,event.button.x,event.button.y);
 		mousemoved = 0;
 		mousedown = 1;
-		mousedowny = event.button.y;
+		mousedowny = TOUCHSCREEN?-1:event.button.y;
 		break;
 	case SDL_KEYDOWN:
 		ret->data.key.modmask = 0;
@@ -178,10 +183,10 @@ swk_gi_event(SwkWindow *w, int dowait) {
 			ret->data.key.modmask |= Alt;
 		if(event.key.keysym.mod & KMOD_META)
 			ret->data.key.modmask |= Meta;
+		fprintf(stderr, "event: key %d %d\n", 
+			ret->data.key.modmask, ret->data.key.keycode);
 		if(ret->data.key.keycode != 0 && event.key.keysym.unicode != 0) {
 			ret->data.key.keycode = event.key.keysym.unicode;
-			fprintf(stderr, "event: key %d %d\n", 
-				ret->data.key.modmask, ret->data.key.keycode);
 		} else {
 			// TODO key aliases defined in config.h
 			switch((int)event.key.keysym.sym) {
@@ -194,7 +199,7 @@ swk_gi_event(SwkWindow *w, int dowait) {
 				ret->data.key.keycode = KDown;
 				break;
 			default:
-				ret->type = -1;
+				ret->data.key.keycode = event.key.keysym.sym;
 				break;
 			}
 		}

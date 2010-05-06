@@ -5,6 +5,7 @@
 #define FONTBOLD 0
 #define WINWIDTH 640
 #define WINHEIGHT 480
+#define TOUCHSCREEN 0
 // SDL
 #define SWK_COLOR(r,g,b) 0x##r,0x##g,0x##b
 // X11
