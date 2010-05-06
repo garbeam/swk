@@ -20,11 +20,17 @@ static TTF_Font *font = NULL;
 static int has_event = 0;
 static SDL_Event lastev = { .type=-1 };
 
-static void putpixel(SDL_Surface *scr, int x, int y, Uint32 pixel) { 
+static inline Uint8 *
+getscrpoint(SDL_Surface *scr, int x, int y) {
 	Uint8 *p = (Uint8 *)scr->pixels + (y*scr->pitch+x*(BPP/8));
 	Uint8 *pend = (Uint8 *)scr->pixels + (scr->h*scr->w*(BPP/8));
 	if((p<((Uint8 *)scr->pixels)) || (p>=pend))
-		return;
+		return NULL;
+	return p;
+}
+
+static void putpixel(SDL_Surface *scr, int x, int y, Uint32 pixel) { 
+	Uint8 *p = getscrpoint(scr, x, y);
 #if BPP == 8
 	*p = pixel;
 #elif BPP == 16
@@ -216,12 +222,10 @@ swk_gi_flip() {
 /* -- drawing primitives -- */
 void
 swk_gi_line(int x1, int y1, int x2, int y2, int color) {
-	int i;
-	x1 *= fs; y1 *= fs;
-	x2 *= fs; y2 *= fs;
-	if(x2==0) for(i=0;i<y2;i++) putpixel(screen, x1, y1+i, pal[color]);
-	else
-	if(y2==0) for(i=0;i<x2;i++) putpixel(screen, x1+i, y1, pal[color]);
+	Rect r = { x1, y1, x2, y2 };
+	if(!x2 || !y2)
+		swk_gi_fill(r, color, 0);
+	// TODO: add support for diagonal lines?
 }
 
 void
@@ -234,6 +238,8 @@ swk_gi_fill(Rect r, int color, int lil) {
 		area.w -= (s*2);
 		area.h -= (s*2);
 	}
+	if (!area.w) area.w = 1;
+	if (!area.h) area.h = 1;
 	SDL_FillRect(screen, &area, pal[color]);
 }
 
@@ -286,13 +292,11 @@ swk_gi_img_free(void *s) {
 
 void
 swk_gi_img_set(void *img, int x, int y, int color) {
-	SDL_Surface *s = (SDL_Surface*)img;
-	if(s) putpixel(s, x, y, color);
+	if(img) putpixel((SDL_Surface*)img, x, y, color);
 }
 
 int
 swk_gi_img_get(void *img, int x, int y) {
-	/* TODO */
-	return 0;
+	Uint8 *p = getscrpoint(img, x, y);
+	return p?*p:0;
 }
-

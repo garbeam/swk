@@ -82,27 +82,27 @@ swk_fontsize_decrease(SwkWindow *w) {
 }
 
 
-static SwkBox *
-getscrollbox(SwkWindow *w) {
+static void
+setscrollbox(SwkWindow *w, int delta) {
 	SwkBox *r = NULL;
 	SwkBox *b = w->boxes;
 	for(; b->cb; b++) {
 		if(b->r.w==-1 && b->r.h==-1 && ((int)(size_t)b->data)<0)
 			r = b;
-		if(w->box==b)
-			return r?r:w->boxes;
+		if(w->box==b && r)
+			break;
 	}
-	return w->boxes;
+	if(r) r->scroll += delta;
 }
 
 void
 swk_scroll_up(SwkWindow *w) {
-	getscrollbox(w)->scroll++;
+	setscrollbox(w, 1);
 }
 
 void
 swk_scroll_down(SwkWindow *w) {
-	getscrollbox(w)->scroll--;
+	setscrollbox(w, -1);
 }
 
 static void swk_fit_row(SwkWindow *w, SwkBox *a, SwkBox *b, int y) {
