@@ -1,14 +1,16 @@
 SWK - simple widget kit
 =======================
-On ArchLinunx:
-  pacman -S sdl sdl_ttf sdl_image
+swk is a minimalist widget kit with support for SDL and X11
 
-On Debian/Ubuntu:
-  apt-get install libsdl-dev libsdl-ttf libsdl-image
 
-Usability guideline
-===================
-Default keybindings are defined in config.h
+Requirements
+============
+In order to build swk you need SDL, SDL-ttf and SDL-image
+
+ArchLinux:     pacman -S sdl sdl_ttf sdl_image
+Debian/Ubuntu: apt-get install libsdl-dev libsdl-ttf libsdl-image
+Maemo n900:    apt-get install libsdl1.3-dev libsdl-image1.2-dev libsdl-ttf2.0-0
+               -> cp config.n900.h config.h
 
 TODO
 ====

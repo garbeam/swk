@@ -136,6 +136,7 @@ swk_gi_event(SwkWindow *w, int dowait) {
 		if(mousedown) {
 			if(mousedowny==-1) // touchscreen trick
 				mousedowny = event.motion.y;
+			else mousemoved = 1;
 			if(event.motion.y>mousedowny+fs) {
 				mousedowny = event.motion.y;
 				swk_scroll_up(w);
