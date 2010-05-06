@@ -91,6 +91,8 @@ static SwkBox helloworld[] = {
 	{ .cb=swk_password, .text="1234", },
 	SWK_BOX_NEWLINE(-1),
 	{ .cb=swk_filler, },
+	{ .cb=swk_sketch },
+	SWK_BOX_NEWLINE(1),
 	{ .cb=swk_image, .text="image.png" },
 	{ .cb=swk_image, .text="image.png" },
 	{ .cb=swk_image, .text="image.png" },

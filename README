@@ -12,6 +12,7 @@ Default keybindings are defined in config.h
 
 TODO
 ====
+* receive fine-grained x,y in Point? for sketch or imaging stuff is important
 * support for clipboard (implemented in gi_ backend)
 * simple way to define callback for buttons instead of reimplementing widget
 * scroll on focus

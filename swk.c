@@ -24,8 +24,7 @@ swk_init(SwkWindow *w) {
 void
 swk_update(SwkWindow *w) {
 	char text[8];
-	int roy, oy;
-	int scroll = 0;
+	int roy, oy, scroll = 0;
 	w->_e.type = EExpose;
 	if(swk_gi_update(w)) {
 		SwkBox *b = w->boxes;
@@ -106,9 +105,8 @@ swk_scroll_down(SwkWindow *w) {
 }
 
 static void swk_fit_row(SwkWindow *w, SwkBox *a, SwkBox *b, int y) {
-	int count, x = 0;
 	SwkBox *btmp;
-	count = 0;
+	int count = 0, x = 0;
 	for(btmp=a; btmp<b; btmp++)
 		count++;
 	if(count) {
@@ -136,9 +134,8 @@ countrows(SwkBox *b) {
 
 void
 swk_fit(SwkWindow *w) {
-	int skip = 0;
-	int x, y = 0;
 	SwkBox *b, *b2;
+	int x, y = 0, skip = 0;
 	for(b=b2=w->boxes; b->cb; b++) {
 		if(b->r.w==-1 && b->r.h==-1) {
 			x = (int)(size_t)b->data;
@@ -288,9 +285,9 @@ swk_label(SwkEvent *e) {
 	switch(e->type) {
 	case EExpose:
 		r = e->box->r;
-		r.w+=6;
+		r.w += 6;
 		swk_gi_text(r, e->box->text);
-		r.w-=6;
+		r.w -= 6;
 		if(e->win->box == e->box)
 			swk_gi_line(r.x, r.y+1, r.w, 0, ColorHI);
 		break;
@@ -301,9 +298,9 @@ swk_label(SwkEvent *e) {
 
 void
 swk_password(SwkEvent *e) {
+	char *str, *ptr;
 	int len;
 	Rect r;
-	char *str, *ptr;
 	switch(e->type) {
 	case EExpose:
 		r = e->box->r;
@@ -353,6 +350,12 @@ swk_entry(SwkEvent *e) {
 		break;
 	default:
 		swk_label(e);
+		break;
+	case EExpose:
+		// XXX: add support for cursor (handle arrow keys)
+		len = e->box->r.x+(strlen(e->box->text)*0.6);
+		swk_label(e);
+		swk_gi_line(len, e->box->r.y, 0, 1, ColorFG);
 		break;
 	}
 }
@@ -468,6 +471,26 @@ swk_image(SwkEvent *e) {
 			Rect r = e->box->r;
 			swk_gi_line(r.x, r.y+1, r.w, 0, ColorHI);
 		}
+		break;
+	default:
+		break;
+	}
+}
+
+void
+swk_sketch(SwkEvent *e) {
+	if(e->box->data == NULL)
+		e->box->data = swk_gi_img_new(e->box->r.w, e->box->r.h, ColorHI);
+	switch(e->type) {
+	case EClick:
+		swk_gi_img_set(e->box->data, 
+			e->data.click.point.x, e->data.click.point.y,
+			ColorFG);
+		printf("CLICKED %p %d %d\n", e->box->data, e->data.click.point.x, e->data.click.point.y);
+		break;
+	case EExpose:
+		swk_gi_img(e->box->r, e->box->data);
+		swk_gi_rect(e->box->r, ColorFG);
 		break;
 	default:
 		break;

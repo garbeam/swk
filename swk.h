@@ -103,6 +103,7 @@ void swk_option(SwkEvent *e);
 void swk_separator(SwkEvent *e);
 void swk_progress(SwkEvent *e);
 void swk_image(SwkEvent *e);
+void swk_sketch(SwkEvent *e);
 
 /* graphic backend */
 
@@ -124,6 +125,7 @@ void swk_gi_text(Rect r, const char *text);
 
 /* images */
 void swk_gi_img(Rect r, void *img);
+void* swk_gi_img_new(int w, int h, int color);
 void* swk_gi_img_load(const char *str);
 void swk_gi_img_free(void *s);
 void swk_gi_img_set(void *img, int x, int y, int color);
