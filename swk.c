@@ -479,18 +479,21 @@ swk_image(SwkEvent *e) {
 
 void
 swk_sketch(SwkEvent *e) {
+	int x, y;
 	if(e->box->data == NULL)
 		e->box->data = swk_gi_img_new(e->box->r.w, e->box->r.h, ColorHI);
 	switch(e->type) {
 	case EClick:
-		swk_gi_img_set(e->box->data, 
-			e->data.click.point.x, e->data.click.point.y,
-			ColorFG);
+		// TODO: implement low-level primitives for pixel-level rendering
+		for(x=y=5;x<10;x=++y)
+			swk_gi_img_set(e->box->data, x, y, ColorFG);
+		for(x=y=5;x<10;x++,y--)
+			swk_gi_img_set(e->box->data, x, y, ColorFG);
 		printf("CLICKED %p %d %d\n", e->box->data, e->data.click.point.x, e->data.click.point.y);
 		break;
 	case EExpose:
+		swk_gi_rect(e->box->r, ColorHI); // border
 		swk_gi_img(e->box->r, e->box->data);
-		swk_gi_rect(e->box->r, ColorFG);
 		break;
 	default:
 		break;

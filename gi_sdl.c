@@ -283,13 +283,15 @@ void
 swk_gi_img(Rect r, void *img) {
 	SDL_Surface *s = (SDL_Surface*)img;
 	SDL_Rect area = { r.x*fs, r.y*fs, r.w*fs, r.h*fs };
+	area.x++;
+	area.y++;
 	if(s) SDL_BlitSurface(s, NULL, screen, &area);
 }
 
 /* image api */
 void*
 swk_gi_img_new(int w, int h, int color) {
-	return SDL_CreateRGBSurface(NULL, w, h, BPP, 0, 0, 0, 0);
+	return SDL_CreateRGBSurface(NULL, (w*fs)-2, (h*fs)-2, BPP, 0, 0, 0, 0);
 }
 
 void*
@@ -304,7 +306,7 @@ swk_gi_img_free(void *s) {
 
 void
 swk_gi_img_set(void *img, int x, int y, int color) {
-	if(img) putpixel((SDL_Surface*)img, x, y, color);
+	if(img) putpixel((SDL_Surface*)img, x, y, pal[color]);
 }
 
 int
