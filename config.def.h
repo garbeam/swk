@@ -1,7 +1,7 @@
 /* See LICENSE file for copyright and license details. */
 
 /* appearance */
-#define FONTSIZE 28
+#define FONTSIZE 18
 #define FONTBOLD 0
 #define WINWIDTH 640
 #define WINHEIGHT 480
@@ -26,7 +26,6 @@ static SwkKeyBind keys[] = {
 	{ Ctrl, 10 ,   swk_focus_next },
 	{ Ctrl, 11 ,   swk_focus_prev },
 	{ Ctrl, 12 ,   swk_focus_activate },
-	{   0, 225 ,   swk_focus_activate }, // n900 return
 	{   0 , KUp,   swk_focus_prev },
 	{   0 , KDown, swk_focus_next },
 	{   0 , 13 ,   swk_focus_activate },

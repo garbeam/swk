@@ -128,7 +128,7 @@ swk_gi_event(SwkWindow *w, int dowait) {
 	switch(event.type) {
 	default: ret = NULL; break;
 	case SDL_VIDEORESIZE:
-		fprintf(stderr, "resize %d %d\n", event.resize.w, event.resize.h);
+		//fprintf(stderr, "resize %d %d\n", event.resize.w, event.resize.h);
 		SDL_SetVideoMode(event.resize.w, event.resize.h, BPP, SDLFLAGS);
 	case SDL_ACTIVEEVENT:
 	case SDL_VIDEOEXPOSE:
@@ -145,11 +145,9 @@ swk_gi_event(SwkWindow *w, int dowait) {
 			if(event.motion.y>mousedowny+fs) {
 				mousedowny = event.motion.y;
 				swk_scroll_up(w);
-				swk_scroll_up(w);
 			} else
 			if(event.motion.y<mousedowny-fs) {
 				mousedowny = event.motion.y;
-				swk_scroll_down(w);
 				swk_scroll_down(w);
 			}
 			ret->type = EExpose;
@@ -266,14 +264,14 @@ swk_gi_rect(Rect r, int color) {
 void
 swk_gi_text(Rect r, const char *text) {
 	char *ptr = NULL;
-	int len = strlen(text);
 	int w = (int)((double)r.w * 1.6); // hacky
-	if(len>w) {
-		ptr = strdup(text);
-		text = (const char *)ptr;
-		ptr[w] = '\0';
-	}
-	if(*text) {
+	if(text && *text) {
+		int len = text?strlen(text):0;
+		if(len>w) {
+			ptr = strdup(text);
+			text = (const char *)ptr;
+			ptr[w] = '\0';
+		}
 		SDL_Surface *ts = TTF_RenderText_Shaded(font, text, fontcolor, bgcolor);
 		if(ts) {
 			SDL_Rect to = { (r.x)*fs, r.y*fs, ts->w, ts->h };

@@ -96,12 +96,12 @@ setscrollbox(SwkWindow *w, int delta) {
 
 void
 swk_scroll_up(SwkWindow *w) {
-	setscrollbox(w, 1);
+	setscrollbox(w, 2);
 }
 
 void
 swk_scroll_down(SwkWindow *w) {
-	setscrollbox(w, -1);
+	setscrollbox(w, -2);
 }
 
 static void swk_fit_row(SwkWindow *w, SwkBox *a, SwkBox *b, int y) {

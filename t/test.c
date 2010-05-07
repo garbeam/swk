@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "swk.h"
+#include <swk.h>
 
 static int count = 3;
 static int pccount = 0;
@@ -84,11 +84,12 @@ static SwkBox scrollwin[] = {
 	{ .cb=swk_label, .text="Scroll to change value", },
 	SWK_BOX_NEWLINE(1),
 	{ .cb=swk_separator },
-	{ .cb=swk_label, .text=".." },
 	SWK_BOX_NEWLINE(1),
-	{ .cb=swk_label, .text="bin" },
+	{ .cb=swk_label, .text="  /etc" },
 	SWK_BOX_NEWLINE(1),
-	{ .cb=swk_label, .text="sbin" },
+	{ .cb=swk_button, .text="/bin" },
+	SWK_BOX_NEWLINE(1),
+	{ .cb=swk_label, .text="  /sbin" },
 	SWK_BOX_NEWLINE(-1),
 	{ .cb=NULL }
 };

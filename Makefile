@@ -1,3 +1,4 @@
+.PHONY: all t clean install
 CC?=gcc
 CFLAGS?=-Wall -g -std=c99
 VERSION=0.1
@@ -14,19 +15,16 @@ GI_LIBS=-lSDL -lSDL_ttf -lSDL_image
 GI_OBJS=gi_${GI}.o
 GI_SRCS=gi_${GI}.c
 
-all: static shared test ui
+all: static shared t
+
+t:
+	cd t && ${MAKE} all
 
 config.h:
 	cp config.def.h config.h
 
-test: config.h test.o libswk.a
-	${CC} test.o -o test libswk.a ${GI_LIBS}
-
-ui: ui.o
-	${CC} ui.o -o ui libswk.a ${GI_LIBS}
-
 clean:
-	rm -f swk.pc swk.mk libswk.a libswk.so test.o swk.o test ${GI_OBJS}
+	rm -f swk.pc swk.mk ui.o ui libswk.a libswk.so test.o swk.o test ${GI_OBJS}
 
 install:
 	mkdir -p ${DESTDIR}/${INCDIR}
@@ -51,8 +49,9 @@ swk.o: config.h
 libswk.a: config.h swk.o ${GI_OBJS}
 	rm -f libswk.a
 	ar qcvf libswk.a swk.o ${GI_OBJS}
-	echo CFLAGS+=-I${PREFIX}/include > swk.mk
-	echo LDFLAGS+=${PREFIX}/lib/libswk.a ${GI_LIBS} >> swk.mk
+	echo SWKINCS+=-I${PREFIX}/include > swk.mk
+	echo SWKLIB+=${PREFIX}/lib/libswk.a >> swk.mk
+	echo SWKLIBS+=${GI_LIBS} >> swk.mk
 	echo prefix=${PREFIX} > swk.pc
 	echo libdir=${LIBDIR} >> swk.pc
 	echo >> swk.pc
