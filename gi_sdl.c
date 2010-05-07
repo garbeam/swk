@@ -4,13 +4,15 @@
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_ttf.h>
 #include "swk.h"
+#define SWK
 #include "config.h"
 
 #define FONTNAME "Inconsolata.otf"
 #define BPP 32
 #define SDLFLAGS SDL_DOUBLEBUF|SDL_RESIZABLE
 
-static int fs = FONTSIZE;
+static int first = 1;
+static int fs = FONTSIZE; // TODO: we need fsW and fsH
 static Uint32 pal[ColorLast];
 static SDL_Color fontcolor = { TFCOLOR };
 static SDL_Color bgcolor = { BGCOLOR };
@@ -66,13 +68,16 @@ swk_gi_fontsize(int sz) {
 
 int
 swk_gi_init(SwkWindow *w) {
-	if(SDL_Init(SDL_INIT_VIDEO)) {
-		fprintf(stderr, "Cannot initialize SDL\n");
-		return 0;
-	}
-	if(TTF_Init()==-1) {
-		fprintf(stderr, "Cannot initialize TTF: %s\n", TTF_GetError());
-		return 0;
+	if(first) {
+		if(SDL_Init(SDL_INIT_VIDEO)) {
+			fprintf(stderr, "Cannot initialize SDL\n");
+			return 0;
+		}
+		if(TTF_Init()==-1) {
+			fprintf(stderr, "Cannot initialize TTF: %s\n", TTF_GetError());
+			return 0;
+		}
+		first = 0;
 	}
 	SDL_SetVideoMode(w->r.w, w->r.h, BPP, SDLFLAGS);
 	// double init is necesary to get window size
@@ -245,8 +250,8 @@ swk_gi_fill(Rect r, int color, int lil) {
 		area.w -= (s*2);
 		area.h -= (s*2);
 	}
-	if (!area.w) area.w = 1;
-	if (!area.h) area.h = 1;
+	if(!area.w) area.w = 1;
+	if(!area.h) area.h = 1;
 	SDL_FillRect(screen, &area, pal[color]);
 }
 
@@ -281,17 +286,17 @@ swk_gi_text(Rect r, const char *text) {
 
 void
 swk_gi_img(Rect r, void *img) {
-	SDL_Surface *s = (SDL_Surface*)img;
-	SDL_Rect area = { r.x*fs, r.y*fs, r.w*fs, r.h*fs };
-	area.x++;
-	area.y++;
-	if(s) SDL_BlitSurface(s, NULL, screen, &area);
+	if(img) {
+		SDL_Rect area = { r.x*fs, r.y*fs, r.w*fs, r.h*fs };
+		area.x++; area.y++;
+		SDL_BlitSurface((SDL_Surface*)img, NULL, screen, &area);
+	}
 }
 
 /* image api */
 void*
 swk_gi_img_new(int w, int h, int color) {
-	return SDL_CreateRGBSurface(NULL, (w*fs)-2, (h*fs)-2, BPP, 0, 0, 0, 0);
+	return (void *)SDL_CreateRGBSurface(0, (w*fs)-2, (h*fs)-2, BPP, 0, 0, 0, 0);
 }
 
 void*

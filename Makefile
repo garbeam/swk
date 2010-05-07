@@ -3,6 +3,7 @@ CFLAGS?=-Wall -g -std=c99
 VERSION=0.1
 DESTDIR?=
 PREFIX?=${DESTDIR}/usr/local
+INCDIR?=${PREFIX}/include
 LIBDIR?=${PREFIX}/lib
 CFLAGS+=-I.
 
@@ -13,7 +14,7 @@ GI_LIBS=-lSDL -lSDL_ttf -lSDL_image
 GI_OBJS=gi_${GI}.o
 GI_SRCS=gi_${GI}.c
 
-all: static shared test
+all: static shared test ui
 
 config.h:
 	cp config.def.h config.h
@@ -21,10 +22,15 @@ config.h:
 test: config.h test.o libswk.a
 	${CC} test.o -o test libswk.a ${GI_LIBS}
 
+ui: ui.o
+	${CC} ui.o -o ui libswk.a ${GI_LIBS}
+
 clean:
 	rm -f swk.pc swk.mk libswk.a libswk.so test.o swk.o test ${GI_OBJS}
 
 install:
+	mkdir -p ${DESTDIR}/${INCDIR}
+	cp swk.h ${DESTDIR}/${INCDIR}
 	mkdir -p ${DESTDIR}/${LIBDIR}
 	cp libswk.a ${DESTDIR}/${LIBDIR}
 	cp libswk.so ${DESTDIR}/${LIBDIR}

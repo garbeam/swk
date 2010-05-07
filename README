@@ -14,10 +14,12 @@ Maemo n900:    apt-get install libsdl1.3-dev libsdl-image1.2-dev libsdl-ttf2.0-0
 
 TODO
 ====
+* 
 * receive fine-grained x,y in Point? for sketch or imaging stuff is important
 * support for clipboard (implemented in gi_ backend)
 * simple way to define callback for buttons instead of reimplementing widget
-* scroll on focus
+* full text editing widget
+* scroll on focus (discuss)
 * mouse bindings in config.h
 * allow widgets to define to force size (height, width)
 * add support to resize images (scaling)
@@ -32,8 +34,8 @@ Text format UI design
 	\n   -> newline
 	\t   -> swk_filler
 	".." -> swk_label
-	---* -> swk_separator
-	===* -> newline(-1)
+	---- -> swk_separator
+	==== -> newline(-1)
 	[..] -> button
 	(..) -> option
 	<.*> -> image

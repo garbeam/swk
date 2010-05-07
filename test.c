@@ -78,6 +78,28 @@ static void mybutton_about(SwkEvent *e) {
 	}
 	swk_button(e);
 }
+//---------
+static SwkBox scrollwin[] = {
+	SWK_BOX_NEWLINE(0),
+	{ .cb=swk_label, .text="Scroll to change value", },
+	SWK_BOX_NEWLINE(1),
+	{ .cb=swk_separator },
+	{ .cb=swk_label, .text=".." },
+	SWK_BOX_NEWLINE(1),
+	{ .cb=swk_label, .text="bin" },
+	SWK_BOX_NEWLINE(1),
+	{ .cb=swk_label, .text="sbin" },
+	SWK_BOX_NEWLINE(-1),
+	{ .cb=NULL }
+};
+
+static void mybutton_numscroll(SwkEvent *e) {
+	if(e->type == EClick) {
+		e->win->boxes = scrollwin;
+		swk_update(e->win);
+	}
+	swk_button(e);
+}
 
 static SwkBox helloworld[] = {
 	{ .cb=swk_label, .text="Press a button", },
@@ -112,6 +134,7 @@ static SwkBox helloworld[] = {
 	SWK_BOX_NEWLINE(2),
 	{ .cb=swk_label, .text="--swktest", },
 	{ .cb=mybutton_about, .text="about" },
+	{ .cb=mybutton_numscroll, .text="num" },
 	{ .cb=NULL }
 };
 
