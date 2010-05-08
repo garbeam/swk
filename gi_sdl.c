@@ -187,8 +187,6 @@ swk_gi_event(SwkWindow *w, int dowait) {
 			ret->data.key.modmask |= Alt;
 		if(event.key.keysym.mod & KMOD_META)
 			ret->data.key.modmask |= Meta;
-		fprintf(stderr, "event: key %d %d\n", 
-			ret->data.key.modmask, ret->data.key.keycode);
 		if(ret->data.key.keycode != 0 && event.key.keysym.unicode != 0) {
 			ret->data.key.keycode = event.key.keysym.unicode;
 		} else {
@@ -207,6 +205,8 @@ swk_gi_event(SwkWindow *w, int dowait) {
 				break;
 			}
 		}
+		fprintf(stderr, "event: key %d %d\n", 
+			ret->data.key.modmask, ret->data.key.keycode);
 		break;
 	case SDL_QUIT:
 		ret->type = EQuit;
