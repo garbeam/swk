@@ -24,7 +24,9 @@ config.h:
 	cp config.def.h config.h
 
 clean:
-	rm -f swk.pc swk.mk ui.o ui libswk.a libswk.so test.o swk.o test ${GI_OBJS}
+	echo >swk.mk
+	cd t && ${MAKE} clean
+	rm -f swk.pc swk.mk libswk.a libswk.so swk.o ${GI_OBJS}
 
 install:
 	mkdir -p ${DESTDIR}/${INCDIR}
