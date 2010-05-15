@@ -5,24 +5,27 @@
 #include "swk.h"
 #include "config.h"
 
+static SwkWindow *w = NULL;
+static int running = 0;
+
 int
-swk_init(SwkWindow *w) {
-	w->_e.win = w;
-	if(w->box == NULL)
+swk_use(SwkWindow *win) {
+	w = win = win->_e.win = win;
+	if(win->box == NULL)
 		swk_focus_first(w);
 	if(w->r.w == 0 || w->r.h == 0) {
 		w->r.w = WINWIDTH;
 		w->r.h = WINHEIGHT;
 	}
-	if(swk_gi_init(w)) {
-		w->running = 1;
-		swk_update(w);
-	}
-	return w->running;
+	if(!running && !swk_gi_init(w))
+		return 0;
+	running = 1;
+	swk_update(w);
+	return 1;
 }
 
 void
-swk_update(SwkWindow *w) {
+swk_update() {
 	char text[8];
 	int roy, oy, scroll = 0;
 	w->_e.type = EExpose;
@@ -51,16 +54,16 @@ swk_update(SwkWindow *w) {
 			oy = b->r.y;
 		}
 		swk_gi_flip();
-	} else w->running = 0;
+	} else running = 0;
 }
 
 void
-swk_exit(SwkWindow *w) {
-	w->running = 0;
+swk_exit() {
+	running = 0;
 }
 
 void
-swk_loop(SwkWindow *w) {
+swk_loop() {
 	SwkEvent *e;
 	do {
 		if((e = swk_next_event(w)))
@@ -69,20 +72,20 @@ swk_loop(SwkWindow *w) {
 }
 
 void
-swk_fontsize_increase(SwkWindow *w) {
+swk_fontsize_increase() {
 	swk_gi_fontsize(1);
 	swk_update(w);
 }
 
 void
-swk_fontsize_decrease(SwkWindow *w) {
+swk_fontsize_decrease() {
 	swk_gi_fontsize(-1);
 	swk_update(w);
 }
 
 
 static void
-setscrollbox(SwkWindow *w, int delta) {
+setscrollbox(int delta) {
 	SwkBox *r = NULL;
 	SwkBox *b = w->boxes;
 	for(; b->cb; b++) {
@@ -95,16 +98,16 @@ setscrollbox(SwkWindow *w, int delta) {
 }
 
 void
-swk_scroll_up(SwkWindow *w) {
-	setscrollbox(w, 2);
+swk_scroll_up() {
+	setscrollbox(2);
 }
 
 void
-swk_scroll_down(SwkWindow *w) {
-	setscrollbox(w, -2);
+swk_scroll_down() {
+	setscrollbox(-2);
 }
 
-static void swk_fit_row(SwkWindow *w, SwkBox *a, SwkBox *b, int y) {
+static void swk_fit_row(SwkBox *a, SwkBox *b, int y) {
 	SwkBox *btmp;
 	int count = 0, x = 0;
 	for(btmp=a; btmp<b; btmp++)
@@ -133,37 +136,37 @@ countrows(SwkBox *b) {
 }
 
 void
-swk_fit(SwkWindow *w) {
+swk_fit() {
 	SwkBox *b, *b2;
 	int x, y = 0, skip = 0;
 	for(b=b2=w->boxes; b->cb; b++) {
 		if(b->r.w==-1 && b->r.h==-1) {
 			x = (int)(size_t)b->data;
-			swk_fit_row(w, b2, b, y);
+			swk_fit_row(b2, b, y);
 			y += x-skip;
 			// vertical align //
-			if(x<0) y+=w->r.h-countrows(b2);
+			if(x<0) y += w->r.h-countrows(b2);
 			b2 = b+1;
 		}
 		y += b->scroll;
 	}
-	swk_fit_row(w, b2, b, y);
+	swk_fit_row(b2, b, y);
 }
 
 int
-swk_has_event(SwkWindow *w) {
+swk_has_event() { // XXX: remove this useless wrap
 	return swk_gi_has_event(w);
 }
 
 void
-swk_focus_activate(SwkWindow *w) {
+swk_focus_activate() {
 	w->_e.box = w->box;
 	w->_e.type = EClick;
 }
 
 SwkEvent *
-swk_next_event(SwkWindow *w) {
-	if(w->running)
+swk_next_event() {
+	if(running)
 		return swk_gi_event(w, 1);
 	w->_e.type = EQuit;
 	w->_e.win = w;
@@ -239,7 +242,7 @@ swk_handle_event(SwkEvent *e) {
 }
 
 void
-swk_focus_first(SwkWindow *w) {
+swk_focus_first() {
 	w->box = w->boxes;
 	while(w->box->cb == swk_filler)
 		w->box++;
@@ -248,7 +251,7 @@ swk_focus_first(SwkWindow *w) {
 }
 
 void
-swk_focus_next(SwkWindow *w) {
+swk_focus_next() {
 	w->box++;
 	if(w->box->cb == NULL)
 		w->box = w->boxes;
@@ -259,7 +262,7 @@ swk_focus_next(SwkWindow *w) {
 }
 
 void
-swk_focus_prev(SwkWindow *w) {
+swk_focus_prev() {
 	if(w->box == w->boxes) {
 		while(w->box->cb)
 			w->box++;

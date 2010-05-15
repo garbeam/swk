@@ -173,8 +173,7 @@ swk_ui(const char *text) {
 		}
 		text++;
 	}
-	w->running = 1;
-	swk_init(w);
+	swk_use(w);
 	return w;
 }
 
@@ -191,7 +190,7 @@ static SwkWindow *w = NULL;
 
 int main() {
 	w = swk_ui(UI);
-	if(!w||!swk_init(w))
+	if(!w||!swk_use(w))
 		return 1;
 	swk_loop(w);
 	return 0;

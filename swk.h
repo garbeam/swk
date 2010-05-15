@@ -13,7 +13,7 @@ typedef struct SwkBox SwkBox;
 typedef struct SwkEvent SwkEvent;
 typedef struct SwkWindow SwkWindow;
 typedef void (*SwkEventCallback)(SwkEvent *e);
-typedef void (*SwkKeyCallback)(SwkWindow *w);
+typedef void (*SwkKeyCallback)();
 
 typedef struct {
 	int x;
@@ -67,7 +67,6 @@ struct SwkBox {
 
 struct SwkWindow {
 	char *title;
-	int running;
 	SwkEventCallback cb;
 	Rect r;
 	SwkBox *boxes;
@@ -76,23 +75,23 @@ struct SwkWindow {
 	SwkEvent _e;
 };
 
-int swk_init(SwkWindow *w);
-void swk_update(SwkWindow *w);
-void swk_exit(SwkWindow *w);
-void swk_fit(SwkWindow *w);
-void swk_loop(SwkWindow *w);
-SwkEvent *swk_next_event(SwkWindow *w);
-int swk_has_event(SwkWindow *w);
+int swk_use(SwkWindow *w);
+void swk_update();
+void swk_exit();
+void swk_fit();
+void swk_loop();
+SwkEvent *swk_next_event();
+int swk_has_event();
 void swk_handle_event(SwkEvent *e);
 
-void swk_focus_first(SwkWindow *w);
-void swk_focus_next(SwkWindow *w);
-void swk_focus_prev(SwkWindow *w);
-void swk_focus_activate(SwkWindow *w);
-void swk_scroll_up(SwkWindow *w);
-void swk_scroll_down(SwkWindow *w);
-void swk_fontsize_increase(SwkWindow *w);
-void swk_fontsize_decrease(SwkWindow *w);
+void swk_focus_first();
+void swk_focus_next();
+void swk_focus_prev();
+void swk_focus_activate();
+void swk_scroll_up();
+void swk_scroll_down();
+void swk_fontsize_increase();
+void swk_fontsize_decrease();
 
 void swk_button(SwkEvent *e);
 void swk_label(SwkEvent *e);

@@ -152,8 +152,8 @@ main() {
 	.cancel=cb
 */
 	};
-	if(!swk_init(&w))
+	if(!swk_use(&w))
 		return 1;
-	swk_loop(&w);
+	swk_loop();
 	return 0;
 }
