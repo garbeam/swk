@@ -1,5 +1,6 @@
 /* See LICENSE file for copyright and license details. */
 
+#define IS_SCROLLBOX(b) (b->r.w==-1 && b->r.h==-1 && ((int)(size_t)b->data)<0)
 #define SWK_BOX_NEWLINE(x) { .data=(void*)(size_t)x, .r.w=-1, .r.h=-1, .cb = swk_filler }
 #define SWK_BOX_VFILL(x) { .data=(void*)(size_t)x, .r.w=-1, .r.h=-2, .cb = swk_filler }
 #define SWK_HIT(r,p) (p.x>=r.x && p.x<(r.x+r.w) && p.y>=r.y && p.y<(r.y+r.h))

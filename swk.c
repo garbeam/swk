@@ -93,7 +93,7 @@ setscrollbox(int delta) {
 	SwkBox *r = NULL;
 	SwkBox *b = w->boxes;
 	for(; b->cb; b++) {
-		if(b->r.w==-1 && b->r.h==-1 && ((int)(size_t)b->data)<0)
+		if(IS_SCROLLBOX(b))
 			r = b;
 		if(w->box==b && r)
 			break;
@@ -131,13 +131,11 @@ swk_fit_row(SwkBox *a, SwkBox *b, int y) {
 
 static int
 countrows(SwkBox *b) {
-	int row = 0;
-	for(; b->cb; b++) {
-		if(b->r.w==-1&&b->r.h==-1)
-			if((int)(size_t)b->data>0)
-				row += (int)(size_t)b->data;
-	}
-	return row+7; // hacky
+	int row = 7; // hacky value to center widgets
+	for(; b->cb; b++)
+		if(IS_SCROLLBOX(b))
+			row += (int)(size_t)b->data;
+	return row;
 }
 
 void
@@ -361,7 +359,7 @@ swk_entry(SwkEvent *e) {
 		break;
 	case EExpose:
 		// XXX: add support for cursor (handle arrow keys)
-		len = e->box->r.x+(strlen(e->box->text)*0.6);
+		len = e->box->r.x+(strlen(e->box->text)*0.7);
 		swk_label(e);
 		swk_gi_line(len, e->box->r.y, 0, 1, ColorFG);
 		break;
@@ -374,6 +372,7 @@ swk_button(SwkEvent *e) {
 	switch(e->type) {
 	case EExpose:
 		r = e->box->r;
+		//r.h = 3; // TODO: add support for multiple-line widgets
 		r.x++;
 		swk_gi_text(r, e->box->text);
 		r.x--;

@@ -1,5 +1,7 @@
 TODO
 ====
+  * allow to set absolute font size
+  * buttons must be 3 line height
   * receive fine-grained x,y in Point? for sketch or imaging stuff is important
   * support for clipboard (implemented in gi_ backend)
   * simple way to define callback for buttons instead of reimplementing widget (?)

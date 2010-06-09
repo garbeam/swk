@@ -8,6 +8,7 @@
 #include "config.h"
 
 #define FONTNAME "Inconsolata.otf"
+#define FONTFACTOR 2.1
 #define BPP 32
 #define SDLFLAGS SDL_DOUBLEBUF|SDL_RESIZABLE
 
@@ -31,7 +32,8 @@ getscrpoint(SDL_Surface *scr, int x, int y) {
 	return p;
 }
 
-static void putpixel(SDL_Surface *scr, int x, int y, Uint32 pixel) { 
+static void
+putpixel(SDL_Surface *scr, int x, int y, Uint32 pixel) { 
 	Uint8 *p = getscrpoint(scr, x, y);
 	if(!p) return;
 #if BPP == 8
@@ -189,21 +191,19 @@ swk_gi_event(SwkWindow *w, int dowait) {
 			ret->data.key.modmask |= Meta;
 		if(ret->data.key.keycode != 0 && event.key.keysym.unicode != 0) {
 			ret->data.key.keycode = event.key.keysym.unicode;
-		} else {
-			// TODO key aliases defined in config.h
-			switch((int)event.key.keysym.sym) {
-			case 1073741906: // n900 up key
-			case 273:
-				ret->data.key.keycode = KUp;
-				break;
-			case 1073741912: // n900 down key
-			case 274:
-				ret->data.key.keycode = KDown;
-				break;
-			default:
-				ret->data.key.keycode = event.key.keysym.sym;
-				break;
-			}
+		} else // TODO key aliases defined in config.h
+		switch((int)event.key.keysym.sym) {
+		case 1073741906: // n900 up key
+		case 273:
+			ret->data.key.keycode = KUp;
+			break;
+		case 1073741912: // n900 down key
+		case 274:
+			ret->data.key.keycode = KDown;
+			break;
+		default:
+			ret->data.key.keycode = event.key.keysym.sym;
+			break;
 		}
 		fprintf(stderr, "event: key %d %d\n", 
 			ret->data.key.modmask, ret->data.key.keycode);
@@ -264,13 +264,13 @@ swk_gi_rect(Rect r, int color) {
 void
 swk_gi_text(Rect r, const char *text) {
 	char *ptr = NULL;
-	int w = (int)((double)r.w * 1.6); // hacky
+	int w = (int)((double)r.w * FONTFACTOR);
 	if(text && *text) {
 		int len = text?strlen(text):0;
 		if(len>w) {
 			ptr = strdup(text);
 			text = (const char *)ptr;
-			ptr[w] = '\0';
+			ptr[w]='\0';
 		}
 		SDL_Surface *ts = TTF_RenderText_Shaded(font, text, fontcolor, bgcolor);
 		if(ts) {

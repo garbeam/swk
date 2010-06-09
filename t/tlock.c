@@ -8,16 +8,15 @@
 // TODO: enable alarm when dpms on
 
 static SwkBox contents[];
-#define COUNT 0
-static int count = COUNT;
-
+static int count = 0;
 static char timestring[80];
+
 static void settimestring() {
 	struct tm lt;
 	time_t t = time(0);
 	localtime_r(&t, &lt);
 	snprintf(timestring, sizeof(timestring),
-		"%04d/%02d/%02d    %02d:%02d:%02d",
+		"  %04d/%02d/%02d    %02d:%02d:%02d",
 		1900+lt.tm_year, lt.tm_mon+1, lt.tm_mday, 
 		lt.tm_hour, lt.tm_min, lt.tm_sec);
 }
@@ -25,10 +24,8 @@ static void settimestring() {
 static void timepoll() {
 	settimestring();
 	swk_update();
-	if(count--<0) {
-		contents[2].scroll = 0;
-		count = COUNT;
-	}
+	if(count--<0)
+		count = contents[2].scroll = 0;
 	alarm(1);
 }
 
@@ -69,6 +66,7 @@ int main() {
 	if(!swk_use(&w))
 		return 1;
 	init_alarm();
+	swk_fontsize_increase();
 	swk_loop();
 	return 0;
 }
