@@ -7,6 +7,7 @@
 
 static SwkWindow *w = NULL;
 static int running = 0;
+static __thread int rendering = 0;
 
 int
 swk_use(SwkWindow *win) {
@@ -20,7 +21,7 @@ swk_use(SwkWindow *win) {
 	if(!running && !swk_gi_init(w))
 		return 0;
 	running = 1;
-	swk_update(w);
+	swk_update();
 	return 1;
 }
 
@@ -28,6 +29,9 @@ void
 swk_update() {
 	char text[8];
 	int roy, oy, scroll = 0;
+	if(rendering)
+		return;
+	rendering = 1;
 	w->_e.type = EExpose;
 	if(swk_gi_update(w)) {
 		SwkBox *b = w->boxes;
@@ -38,7 +42,7 @@ swk_update() {
 			w->_e.box = b;
 			if(b->r.w==-1 && b->r.h==-1 && ((int)(size_t)b->data)<0)
 				roy = oy+1;
-			if (b->scroll)
+			if(b->scroll)
 				scroll = b->scroll;
 			if(roy && b->r.y < roy) {
 				sprintf(text, "(%d)", scroll);
@@ -47,16 +51,17 @@ swk_update() {
 				r.y = roy;
 				r.w = 3;
 				swk_gi_text(r, text);
-				r.x--;
-				swk_gi_line(r.x, roy, r.w, 0, ColorHI);
+				swk_gi_line(--r.x, roy, r.w, 0, ColorHI);
 			}
 			else b->cb(&w->_e);
 			oy = b->r.y;
 		}
 		swk_gi_flip();
-	} else running = 0;
+	}
+	rendering = 0;
 }
 
+// TODO: enqueue events here instead of use a global variable?
 void
 swk_exit() {
 	running = 0;
@@ -83,7 +88,6 @@ swk_fontsize_decrease() {
 	swk_update(w);
 }
 
-
 static void
 setscrollbox(int delta) {
 	SwkBox *r = NULL;
@@ -107,7 +111,8 @@ swk_scroll_down() {
 	setscrollbox(-2);
 }
 
-static void swk_fit_row(SwkBox *a, SwkBox *b, int y) {
+static void
+swk_fit_row(SwkBox *a, SwkBox *b, int y) {
 	SwkBox *btmp;
 	int count = 0, x = 0;
 	for(btmp=a; btmp<b; btmp++)
@@ -199,14 +204,14 @@ swk_handle_event(SwkEvent *e) {
 		e->box = e->win->box;
 		if(e->win->box)
 			e->win->box->cb(e);
-		swk_update(e->win);
+		swk_update();
 		break;
 	case EMotion:
 		for(b=e->win->boxes; b->cb; b++) {
 			if(SWK_HIT(b->r, e->data.motion)) {
 				e->win->box = e->box = b;
 				b->cb(e);
-				swk_update(e->win);
+				swk_update();
 				break;
 			}
 		}
@@ -228,10 +233,10 @@ swk_handle_event(SwkEvent *e) {
 				}
 			}
 		}
-		swk_update(e->win);
+		swk_update();
 		break;
 	case EExpose:
-		swk_update(e->win);
+		swk_update();
 		break;
 	case EQuit:
 		swk_gi_exit();
