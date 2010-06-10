@@ -13,6 +13,7 @@ static __thread int rendering = 0;
 int
 swk_use(SwkWindow *win) {
 	w = win = win->_e.win = win;
+	w->colpos = COLSPLIT;
 	if(win->box == NULL)
 		swk_focus_first(w);
 	if(w->r.w == 0 || w->r.h == 0) {
@@ -30,38 +31,46 @@ void
 swk_update() {
 	char text[8];
 	int roy, oy, scroll = 0;
+	int col = (w->boxes[1])?((w->colpos>w->r.w)?w->r.w:w->colpos):w->r.w;
 	if(rendering)
 		return;
-	//printf("boxy %d/%d\n", w->box->r.y, w->r.h);
 	// TODO: Handle scrollup by widget focus
-	if (w->box->r.y > w->r.h)
+	if(w->box->r.y > w->r.h)
 		setscrollbox(-2);
 	rendering = 1;
 	w->_e.type = EExpose;
 	if(swk_gi_update(w)) {
-		SwkBox *b = w->boxes;
+		int count = 2;
+		int orw = w->r.w;
+		SwkBox *b = w->boxes[0];
 		swk_fit(w);
 		swk_gi_clear();
-		roy = oy = 0;
-		for(;b->cb; b++) {
-			w->_e.box = b;
-			if(b->r.w==-1 && b->r.h==-1 && ((int)(size_t)b->data)<0)
-				roy = oy+1;
-			if(b->scroll)
-				scroll = b->scroll;
-			if(roy && b->r.y < roy) {
-				sprintf(text, "(%d)", scroll);
-				Rect r = w->r;
-				r.x = r.w-1;
-				r.y = roy;
-				r.w = 3;
-				swk_gi_text(r, text);
-				swk_gi_line(--r.x, roy, r.w, 0, ColorHI);
+		for(w->r.w=col; ; b = w->boxes[1]) {
+			swk_fit(w);
+			roy = oy = 0;
+			for(;b->cb; b++) {
+				w->_e.box = b;
+				if(IS_SCROLLBOX(b))
+					roy = oy+1;
+				if(b->scroll)
+					scroll = b->scroll;
+				if(roy && b->r.y < roy) {
+					Rect r = w->r;
+					r.x = col-1;
+					r.y = roy;
+					r.w = 3;
+					sprintf(text, "(%d)", scroll);
+					swk_gi_text(r, text);
+					swk_gi_line(--r.x, roy, 2, 0, ColorHI);
+				} else b->cb(&w->_e);
+				oy = b->r.y;
 			}
-			else b->cb(&w->_e);
-			oy = b->r.y;
+			if(!w->boxes[1] || !--count)
+				break;
+			col = orw-w->col;
 		}
 		swk_gi_flip();
+		w->r.w = orw;
 	}
 	rendering = 0;
 }
@@ -84,19 +93,33 @@ swk_loop() {
 void
 swk_fontsize_increase() {
 	swk_gi_fontsize(1);
+	w->colpos--;
 	swk_update(w);
 }
 
 void
 swk_fontsize_decrease() {
 	swk_gi_fontsize(-1);
+	w->colpos++;
+	swk_update(w);
+}
+
+void
+swk_column_move_left() {
+	w->colpos--;
+	swk_update(w);
+}
+
+void
+swk_column_move_right() {
+	w->colpos++;
 	swk_update(w);
 }
 
 static void
 setscrollbox(int delta) {
 	SwkBox *r = NULL;
-	SwkBox *b = w->boxes;
+	SwkBox *b = w->boxes[w->col];
 	for(; b->cb; b++) {
 		if(IS_SCROLLBOX(b))
 			r = b;
@@ -108,23 +131,23 @@ setscrollbox(int delta) {
 
 void
 swk_scroll_up() {
-	setscrollbox(2);
+	w->box = w->boxes[w->col];
+	setscrollbox(SCROLLSPEED);
 }
 
 void
 swk_scroll_down() {
-	setscrollbox(-2);
+	w->box = w->boxes[w->col];
+	setscrollbox(-SCROLLSPEED);
 }
 
 static void
-swk_fit_row(SwkBox *a, SwkBox *b, int y) {
-	SwkBox *btmp;
-	int count = 0, x = 0;
-	for(btmp=a; btmp<b; btmp++)
-		count++;
+swk_fit_row(SwkBox *a, SwkBox *b, int col, int y) {
+	int x = (col)?w->colpos:0, count = b-a;
 	if(count) {
 		int winc = w->r.w / count;
-		for(btmp=a; btmp<b; btmp++) {
+		SwkBox *btmp = a;
+		for(; btmp<b; btmp++) {
 			btmp->r.x = x;
 			btmp->r.y = y;
 			btmp->r.w = winc;
@@ -146,24 +169,27 @@ countrows(SwkBox *b) {
 
 void
 swk_fit() {
+	int i, x, y, skip, tskip;
 	SwkBox *b, *b2;
-	int x, y = 0, skip = 0;
-	int tskip = 0;
-	for(b=b2=w->boxes; b->cb; b++) {
-		if(b->r.w==-1 && b->r.h==-1) {
-			x = (int)(size_t)b->data;
-			swk_fit_row(b2, b, y);
-			y += x-skip+tskip;
-			// vertical align //
-			tskip = 0;
-			if(x<0) y += w->r.h-countrows(b2);
-			b2 = b+1;
-		} else
-		if(b->r.h>1)
-			tskip = b->r.h;
-		y += b->scroll;
+	for(i=0;i<2;i++) {
+		skip = tskip = y = 0;
+		for(b=b2=w->boxes[i]; b->cb; b++) {
+			if(b->r.w==-1 && b->r.h==-1) {
+				x = (int)(size_t)b->data;
+				swk_fit_row(b2, b, i, y);
+				y += x-skip+tskip;
+				// vertical align //
+				tskip = 0;
+				if(x<0) y += w->r.h-countrows(b2);
+				b2 = b+1;
+			} else if(b->r.h>1)
+				tskip = b->r.h;
+			y += b->scroll;
+		}
+		swk_fit_row(b2, b, i, y);
+		if(!w->boxes[1])
+			break;
 	}
-	swk_fit_row(b2, b, y);
 }
 
 int
@@ -201,7 +227,7 @@ swk_handle_event(SwkEvent *e) {
 				break;
 			}
 		}
-		/* XXX: this must be implemented in app? */
+		/* XXX: this must be implemented in app? .. sure */
 		if(e->data.key.keycode==27) {
 			e->box = e->win->box;
 			e->type = EQuit;
@@ -215,7 +241,8 @@ swk_handle_event(SwkEvent *e) {
 		swk_update();
 		break;
 	case EMotion:
-		for(b=e->win->boxes; b->cb; b++) {
+		w->col = (e->data.motion.x > w->colpos)?1:0;
+		for(b=e->win->boxes[w->col]; b->cb; b++) {
 			if(SWK_HIT(b->r, e->data.motion)) {
 				e->win->box = e->box = b;
 				b->cb(e);
@@ -234,7 +261,7 @@ swk_handle_event(SwkEvent *e) {
 			swk_scroll_down(e->win);
 			break;
 		default:
-			for(b=e->win->boxes; b->cb; b++) {
+			for(b=e->win->boxes[w->col]; b->cb; b++) {
 				if(SWK_HIT(b->r, e->data.click.point)) {
 					e->box = e->win->box = b;
 					e->box->cb(e);
@@ -256,18 +283,18 @@ swk_handle_event(SwkEvent *e) {
 
 void
 swk_focus_first() {
-	w->box = w->boxes;
+	w->box = w->boxes[w->col];
 	while(w->box->cb == swk_filler)
 		w->box++;
 	if(w->box->cb == NULL)
-		w->box = w->boxes;
+		w->box = w->boxes[w->col];
 }
 
 void
 swk_focus_next() {
 	w->box++;
 	if(w->box->cb == NULL)
-		w->box = w->boxes;
+		w->box = w->boxes[w->col];
 	while(w->box->cb == swk_filler)
 		w->box++;
 	if(w->box->cb == NULL)
@@ -276,7 +303,7 @@ swk_focus_next() {
 
 void
 swk_focus_prev() {
-	if(w->box == w->boxes) {
+	if(w->box == w->boxes[w->col]) {
 		while(w->box->cb)
 			w->box++;
 		w->box--;
@@ -284,8 +311,8 @@ swk_focus_prev() {
 		w->box--;
 		while(w->box->cb == swk_filler) {
 			w->box--;
-			if(w->box < w->boxes) {
-				w->box = w->boxes;
+			if(w->box < w->boxes[w->col]) {
+				w->box = w->boxes[w->col];
 				swk_focus_prev(w);
 				return;
 			}

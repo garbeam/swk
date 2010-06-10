@@ -8,7 +8,7 @@
 #include "config.h"
 
 #define FONTNAME "Inconsolata.otf"
-#define FONTFACTOR 2.1
+#define FONTFACTOR 2.1 /* XXX */
 #define BPP 32
 #define SDLFLAGS SDL_DOUBLEBUF|SDL_RESIZABLE
 
@@ -263,16 +263,16 @@ swk_gi_rect(Rect r, int color) {
 
 void
 swk_gi_text(Rect r, const char *text) {
+	const char *tptr = text;
 	char *ptr = NULL;
 	int w = (int)((double)r.w * FONTFACTOR);
 	if(text && *text) {
 		int len = text?strlen(text):0;
 		if(len>w) {
-			ptr = strdup(text);
-			text = (const char *)ptr;
+			tptr = ptr = strdup(text);
 			ptr[w]='\0';
 		}
-		SDL_Surface *ts = TTF_RenderText_Shaded(font, text, fontcolor, bgcolor);
+		SDL_Surface *ts = TTF_RenderText_Shaded(font, tptr, fontcolor, bgcolor);
 		if(ts) {
 			SDL_Rect to = { (r.x)*fs, r.y*fs, ts->w, ts->h };
 			SDL_BlitSurface(ts, NULL, screen, &to);

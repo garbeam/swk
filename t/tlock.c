@@ -60,12 +60,16 @@ static void init_alarm() {
 int main() {
 	SwkWindow w = {
 		.title="touch lock",
-		.boxes=contents,
+		.boxes={contents,NULL},
 		.box=contents,
+		.r={200, 100, 800, 500} // x,y, w,h
 	};
 	if(!swk_use(&w))
 		return 1;
 	init_alarm();
+	swk_fontsize_increase();
+	swk_fontsize_increase();
+	swk_fontsize_increase();
 	swk_fontsize_increase();
 	swk_loop();
 	return 0;

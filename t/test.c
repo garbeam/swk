@@ -30,7 +30,7 @@ static void myprogressbutton(SwkEvent *e) {
 		pccount+=6;
 		if(pccount > 100) {
 			pccount = 0;
-			e->win->boxes = helloworld;
+			e->win->boxes[e->win->col] = helloworld;
 			swk_update(e->win);
 		}
 		sprintf(pctext, "%d%%", pccount);
@@ -65,7 +65,7 @@ static SwkBox about[] = {
 
 static void mybutton_about_ok(SwkEvent *e) {
 	if(e->type == EClick) {
-		e->win->boxes = helloworld;
+		e->win->boxes[e->win->col] = helloworld;
 		swk_update(e->win);
 	}
 	swk_button(e);
@@ -73,7 +73,7 @@ static void mybutton_about_ok(SwkEvent *e) {
 
 static void mybutton_about(SwkEvent *e) {
 	if(e->type == EClick) {
-		e->win->boxes = about;
+		e->win->boxes[e->win->col] = about;
 		swk_update(e->win);
 	}
 	swk_button(e);
@@ -96,7 +96,7 @@ static SwkBox scrollwin[] = {
 
 static void mybutton_numscroll(SwkEvent *e) {
 	if(e->type == EClick) {
-		e->win->boxes = scrollwin;
+		e->win->boxes[e->win->col] = scrollwin;
 		swk_update(e->win);
 	}
 	swk_button(e);
@@ -139,11 +139,18 @@ static SwkBox helloworld[] = {
 	{ .cb=NULL }
 };
 
+static SwkBox column[] = {
+	{ .cb=swk_label, .text="this is a column", },
+	SWK_BOX_NEWLINE(-1),
+	{ .cb=swk_label, .text="text in column", },
+	{ .cb=NULL }
+};
+
 int
 main() {
 	SwkWindow w = {
 		.title="Hello World",
-		.boxes=helloworld,
+		.boxes={ helloworld, column },
 		.box=helloworld+10,
 		//.r = { 0, 0, 320, 240 },
 /*

@@ -24,7 +24,7 @@ SwkBox *b = swk_ui_get(w, "ok");
 void
 swk_ui_free(SwkWindow *w) {
 	// leaks in box->text ?
-	free(w->boxes);
+	free(w->boxes[1]);
 	free(w->title);
 	free(w);
 }
@@ -56,7 +56,8 @@ swk_ui(const char *text) {
 	}
 	printf("WINDETS=%d\n", sz);
 
-	w->box = w->boxes = (SwkBox*)malloc(128*sizeof(SwkBox)); // Use sz after counting
+	w->box = w->boxes[0] = (SwkBox*)malloc(128*sizeof(SwkBox)); // Use sz after counting
+	w->boxes[1] = NULL;
 	memset(w->box, 0, 128*sizeof(SwkBox));
 
 	while(text && *text) {
@@ -65,8 +66,8 @@ swk_ui(const char *text) {
 			if ((*text=='\''&&str[stri-1]!='\\') || *text=='\n') {
 				printf("label(%s)\n", str);
 				stri = mode = 0;
-				w->boxes[count].cb = swk_label;
-				w->boxes[count].text = strdup (str);
+				w->boxes[w->col][count].cb = swk_label;
+				w->boxes[w->col][count].text = strdup (str);
 				count++;
 			} else {
 				str[stri++] = *text;
@@ -77,8 +78,8 @@ swk_ui(const char *text) {
 			if ((*text=='>'&&str[stri-1]!='\\') || *text=='\n') {
 				printf("image(%s)\n", str);
 				stri = mode = 0;
-				w->boxes[count].cb = swk_image;
-				w->boxes[count].text = strdup (str);
+				w->boxes[w->col][count].cb = swk_image;
+				w->boxes[w->col][count].text = strdup (str);
 				count++;
 			} else {
 				str[stri++] = *text;
@@ -87,7 +88,7 @@ swk_ui(const char *text) {
 			break;
 		case '*':
 			if (*text=='\n') {
-				w->boxes[count].cb = swk_filler;
+				w->boxes[w->col][count].cb = swk_filler;
 				count++;
 				mode = 0;
 			}
@@ -95,14 +96,14 @@ swk_ui(const char *text) {
 		case '=':
 			if (*text=='\n') {
 				SwkBox b = SWK_BOX_NEWLINE(-1);
-				w->boxes[count] = b;
+				w->boxes[w->col][count] = b;
 				count++;
 				mode = 0;
 			}
 			break;
 		case '-':
 			if (*text=='\n') {
-				w->boxes[count].cb = swk_separator;
+				w->boxes[w->col][count].cb = swk_separator;
 				count++;
 				mode = 0;
 			}
@@ -111,8 +112,8 @@ swk_ui(const char *text) {
 			if ((*text==')'&&str[stri-1]!='\\') || *text=='\n') {
 				printf("option(%s)\n", str);
 				stri = mode = 0;
-				w->boxes[count].cb = swk_option;
-				w->boxes[count].text = strdup (str);
+				w->boxes[w->col][count].cb = swk_option;
+				w->boxes[w->col][count].text = strdup (str);
 				count++;
 			} else {
 				str[stri++] = *text;
@@ -124,12 +125,12 @@ swk_ui(const char *text) {
 				stri = mode = 0;
 				if (*str=='*') {
 					printf("pass(%s)\n", str);
-					w->boxes[count].cb = swk_password;
-					w->boxes[count].text = "";
+					w->boxes[w->col][count].cb = swk_password;
+					w->boxes[w->col][count].text = "";
 				} else {
 					printf("entry(%s)\n", str);
-					w->boxes[count].cb = swk_entry;
-					w->boxes[count].text = strdup (str);
+					w->boxes[w->col][count].cb = swk_entry;
+					w->boxes[w->col][count].text = strdup (str);
 				}
 				count++;
 			} else {
@@ -141,8 +142,8 @@ swk_ui(const char *text) {
 			if ((*text==']'&&str[stri-1]!='\\') || *text=='\n') {
 				printf("button(%s)\n", str);
 				stri = mode = 0;
-				w->boxes[count].cb = swk_button;
-				w->boxes[count].text = strdup (str);
+				w->boxes[w->col][count].cb = swk_button;
+				w->boxes[w->col][count].text = strdup (str);
 				count++;
 			} else {
 				str[stri++] = *text;
@@ -162,7 +163,7 @@ swk_ui(const char *text) {
 		default:
 			if (*text=='\n') {
 				SwkBox b = SWK_BOX_NEWLINE(1);
-				w->boxes[count] = b;
+				w->boxes[w->col][count] = b;
 				count++;
 			} else {
 				mode = *text;

@@ -70,7 +70,9 @@ struct SwkWindow {
 	char *title;
 	SwkEventCallback cb;
 	Rect r;
-	SwkBox *boxes;
+	SwkBox *boxes[2];
+	int col;
+	int colpos;
 	/* internal use */
 	SwkBox *box;
 	SwkEvent _e;
@@ -93,8 +95,11 @@ void swk_scroll_up();
 void swk_scroll_down();
 void swk_fontsize_increase();
 void swk_fontsize_decrease();
+void swk_column_move_left();
+void swk_column_move_right();
 
 void swk_button(SwkEvent *e);
+void swk_bigbutton(SwkEvent *e);
 void swk_label(SwkEvent *e);
 void swk_entry(SwkEvent *e);
 void swk_password(SwkEvent *e);
