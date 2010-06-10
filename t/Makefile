@@ -15,3 +15,6 @@ ui: ui.o
 
 clean:
 	rm -f test test.o ui ui.o tlock tlock.o
+
+fun:
+	cd .. && make clean ; make && cd t && ./test

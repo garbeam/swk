@@ -1,5 +1,6 @@
 TODO
 ====
+  * add support for column breakers { SWK_NEWCOLUMN() }
   * allow to set absolute font size
   * buttons must be 3 line height
   * receive fine-grained x,y in Point? for sketch or imaging stuff is important

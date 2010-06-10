@@ -5,6 +5,7 @@
 #include "swk.h"
 #include "config.h"
 
+static void setscrollbox(int delta);
 static SwkWindow *w = NULL;
 static int running = 0;
 static __thread int rendering = 0;
@@ -31,6 +32,10 @@ swk_update() {
 	int roy, oy, scroll = 0;
 	if(rendering)
 		return;
+	//printf("boxy %d/%d\n", w->box->r.y, w->r.h);
+	// TODO: Handle scrollup by widget focus
+	if (w->box->r.y > w->r.h)
+		setscrollbox(-2);
 	rendering = 1;
 	w->_e.type = EExpose;
 	if(swk_gi_update(w)) {
@@ -123,7 +128,8 @@ swk_fit_row(SwkBox *a, SwkBox *b, int y) {
 			btmp->r.x = x;
 			btmp->r.y = y;
 			btmp->r.w = winc;
-			btmp->r.h = 1;
+			if(!btmp->r.h)
+				btmp->r.h = 1;
 			x += winc;
 		}
 	}
@@ -131,7 +137,7 @@ swk_fit_row(SwkBox *a, SwkBox *b, int y) {
 
 static int
 countrows(SwkBox *b) {
-	int row = 7; // hacky value to center widgets
+	int row = 17; // hacky value to center widgets
 	for(; b->cb; b++)
 		if(IS_SCROLLBOX(b))
 			row += (int)(size_t)b->data;
@@ -142,15 +148,19 @@ void
 swk_fit() {
 	SwkBox *b, *b2;
 	int x, y = 0, skip = 0;
+	int tskip = 0;
 	for(b=b2=w->boxes; b->cb; b++) {
 		if(b->r.w==-1 && b->r.h==-1) {
 			x = (int)(size_t)b->data;
 			swk_fit_row(b2, b, y);
-			y += x-skip;
+			y += x-skip+tskip;
 			// vertical align //
+			tskip = 0;
 			if(x<0) y += w->r.h-countrows(b2);
 			b2 = b+1;
-		}
+		} else
+		if(b->r.h>1)
+			tskip = b->r.h;
 		y += b->scroll;
 	}
 	swk_fit_row(b2, b, y);
@@ -372,10 +382,30 @@ swk_button(SwkEvent *e) {
 	switch(e->type) {
 	case EExpose:
 		r = e->box->r;
-		//r.h = 3; // TODO: add support for multiple-line widgets
 		r.x++;
 		swk_gi_text(r, e->box->text);
 		r.x--;
+		if(e->win->box == e->box)
+			swk_gi_rect(r, ColorHI);
+		else swk_gi_rect(r, ColorFG);
+		break;
+	default:
+		break;
+	}
+}
+
+void
+swk_bigbutton(SwkEvent *e) {
+	Rect r;
+	switch(e->type) {
+	case EExpose:
+		e->box->r.h = 3;
+		r = e->box->r;
+		r.x += 2;
+		r.y += 1;
+		swk_gi_text(r, e->box->text);
+		r.y -= 1;
+		r.x -= 2;
 		if(e->win->box == e->box)
 			swk_gi_rect(r, ColorHI);
 		else swk_gi_rect(r, ColorFG);
@@ -404,7 +434,8 @@ swk_option(SwkEvent *e) {
 		r = e->box->r;
 		if(e->win->box == e->box)
 			swk_gi_line(r.x, r.y+1, r.w, 0, ColorHI);
-		r.w = r.h = 1;
+		//r.w = r.h = 1;
+		r.w = 1;
 		if(b==(void*)1) swk_gi_fill(r, ColorHI, 1);
 		else if(b==(void*)0) swk_gi_fill(r, ColorFG, 1);
 		else if(e->box==*b) swk_gi_fill(r, ColorHI, 1);

@@ -22,7 +22,7 @@ static void mybutton(SwkEvent *e) {
 		if(count-- == 0)
 			swk_exit(e->win);
 	}
-	swk_button(e);
+	swk_bigbutton(e);
 }
 
 static void myprogressbutton(SwkEvent *e) {
