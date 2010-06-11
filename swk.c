@@ -45,6 +45,11 @@ swk_update() {
 		SwkBox *b = w->boxes[0];
 		swk_fit(w);
 		swk_gi_clear();
+		if (!w->colpos) {
+			b = w->boxes[1];
+			count--;
+			col = w->r.w;
+		}
 		for(w->r.w=col; ; b = w->boxes[1]) {
 			swk_fit(w);
 			roy = oy = 0;

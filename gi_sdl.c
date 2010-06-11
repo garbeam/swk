@@ -156,9 +156,11 @@ swk_gi_event(SwkWindow *w, int dowait) {
 			if(event.motion.x>mousedownx+fs) {
 				mousedownx = event.motion.x;
 				swk_column_move_right();
+				swk_column_move_right();
 			} else
 			if(event.motion.x<mousedownx-fs) {
 				mousedownx = event.motion.x;
+				swk_column_move_left();
 				swk_column_move_left();
 			}
 			ret->type = EExpose;
