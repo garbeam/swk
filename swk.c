@@ -53,6 +53,7 @@ swk_update() {
 		for(w->r.w=col; ; b = w->boxes[1]) {
 			swk_fit(w);
 			roy = oy = 0;
+			if (b)
 			for(;b->cb; b++) {
 				w->_e.box = b;
 				if(IS_SCROLLBOX(b))
@@ -248,7 +249,7 @@ swk_handle_event(SwkEvent *e) {
 		swk_update();
 		break;
 	case EMotion:
-		w->col = (e->data.motion.x > w->colpos)?1:0;
+		w->col = w->boxes[1]?((e->data.motion.x > w->colpos)?1:0):0;
 		for(b=e->win->boxes[w->col]; b->cb; b++) {
 			if(SWK_HIT(b->r, e->data.motion)) {
 				e->win->box = e->box = b;

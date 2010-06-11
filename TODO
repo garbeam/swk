@@ -1,30 +1,40 @@
 TODO
 ====
+  * support multiline text widget
+  * support for user-defined input handler
+    (when input widget is activated, run xterm -e vim str > text)
   * add support for negative colpos (align to right)
-  * allow to set absolute font size
-  * buttons must be 3 line height
   * receive fine-grained x,y in Point? for sketch or imaging stuff is important
   * support for clipboard (implemented in gi_ backend)
   * simple way to define callback for buttons instead of reimplementing widget (?)
   * full text editing widget (multiline, cursor support, text format, ...)
-  * scroll on focus (if focused widget is not in screen, just scroll there..)
+    - this must be done with an external input handler (use vim, dmenu, .. )
   * mouse bindings in config.h (which mouse bindings we need? wheel to scroll?)
-  * allow widgets to force its own size (height, width)
+    - add horitzonal scroll wheel support
   * add support to resize images (scaling)
   * only focus buttons and entries (input widgets)
-  * add function to click button 1, 2, 3, ... // clicking from code..
+    - will make the design inconsistent and the code more complex
   * allow to load images from memory instead of files
-  * default image path (?)
+  * define default image path in config.h
+
+Transitions
+===========
   * transitions (to change from one window to another)
+    - this can be done in a simple loop() calling swk_update and using colpos
 
-absolute/relative
-=================
+Events
+======
+  * We need a way to enqueue events
+  * add function to click button 1, 2, 3, ... // clicking from code..
+
+Think about a decent absolute/relative
+======================================
   * column split position (w->colpos)
-  * scrolling box
-  * font size
+  * scrolling box (..)
+  * font size (font_inc, font_dec, font_set)
 
-USABILITY GUIDELINE
-===================
+Design rules
+============
   * useful
   * usable
   * transparent
