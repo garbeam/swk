@@ -106,13 +106,15 @@ swk_fontsize_decrease() {
 
 void
 swk_column_move_left() {
-	w->colpos--;
+	if(w->colpos>0)
+		w->colpos--;
 	swk_update(w);
 }
 
 void
 swk_column_move_right() {
-	w->colpos++;
+	if(w->colpos<w->r.w)
+		w->colpos++;
 	swk_update(w);
 }
 
@@ -160,7 +162,7 @@ swk_fit_row(SwkBox *a, SwkBox *b, int col, int y) {
 
 static int
 countrows(SwkBox *b) {
-	int row = 17; // hacky value to center widgets
+	int row = 17; // XXX hacky value to center widgets
 	for(; b->cb; b++)
 		if(IS_SCROLLBOX(b))
 			row += (int)(size_t)b->data;

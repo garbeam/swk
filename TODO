@@ -17,6 +17,12 @@ TODO
   * default image path (?)
   * transitions (to change from one window to another)
 
+absolute/relative
+=================
+  * column split position (w->colpos)
+  * scrolling box
+  * font size
+
 USABILITY GUIDELINE
 ===================
   * useful

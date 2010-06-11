@@ -118,7 +118,7 @@ swk_gi_has_event(SwkWindow *w) {
 
 SwkEvent *
 swk_gi_event(SwkWindow *w, int dowait) {
-	static int mousedowny, mousedown = 0;
+	static int mousedowny, mousedownx, mousedown = 0;
 	static int mousemoved = 0;
 	SDL_Event event;
 	SwkEvent *ret = &w->_e;
@@ -139,11 +139,12 @@ swk_gi_event(SwkWindow *w, int dowait) {
 		ret->data.expose.w = ret->data.expose.h = 0;
 		break;
 	case SDL_MOUSEMOTION:
+		// TODO: move this stuff into swk.c.. shoudlnt be backend dependent
 		//fprintf(stderr, "event: motion (%d,%d)\n", event.motion.x,event.motion.y);
 		if(mousedown) {
-			if(mousedowny==-1) // touchscreen trick
-				mousedowny = event.motion.y;
-			else mousemoved = 1;
+			// touchscreen spaguetti trick
+			if(mousedowny==-1) mousedowny = event.motion.y; else mousemoved = 1;
+			if(mousedownx==-1) mousedownx = event.motion.x; else mousemoved = 1;
 			if(event.motion.y>mousedowny+fs) {
 				mousedowny = event.motion.y;
 				swk_scroll_up(w);
@@ -151,6 +152,14 @@ swk_gi_event(SwkWindow *w, int dowait) {
 			if(event.motion.y<mousedowny-fs) {
 				mousedowny = event.motion.y;
 				swk_scroll_down(w);
+			}
+			if(event.motion.x>mousedownx+fs) {
+				mousedownx = event.motion.x;
+				swk_column_move_right();
+			} else
+			if(event.motion.x<mousedownx-fs) {
+				mousedownx = event.motion.x;
+				swk_column_move_left();
 			}
 			ret->type = EExpose;
 			ret->data.expose.x = ret->data.expose.y = \

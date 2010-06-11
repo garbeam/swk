@@ -1,7 +1,9 @@
 #define PORTRAIT 0
+#define SCROLLSPEED 2
+#define COLSPLIT 20
 
 #define FONTBOLD 1
-#define FONTSIZE 32
+#define FONTSIZE 28
 #define TOUCHSCREEN 1
 
 #if PORTRAIT
