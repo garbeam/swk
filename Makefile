@@ -10,12 +10,24 @@ CFLAGS+=-I.
 
 # graphic backend
 GI?=sdl
+ifeq (${GI},sdl)
 GI_LIBS=-lSDL -lSDL_ttf -lSDL_image
+else
+ifeq (${GI},x11)
+GI_LIBS=-lX11
+endif
+endif
 
 GI_OBJS=gi_${GI}.o
 GI_SRCS=gi_${GI}.c
 
 all: static shared t
+
+x:
+	make clean ; make GI=x11 && cd t ; ./test
+
+s:
+	make clean ; make GI=sdl && cd t ; ./test
 
 t:
 	cd t && ${MAKE} all
