@@ -22,10 +22,12 @@
 static SwkKeyBind keys[] = {
 	{ Ctrl, 'j',   swk_focus_next },
 	{ Ctrl, 'k',   swk_focus_prev },
+	{ Ctrl, 'h' ,   swk_column_move_left },
+	{ Ctrl, 'l',   swk_column_move_right },
 	//{ Ctrl,  8 ,   swk_focus_first },
 	//{ Ctrl,  9 ,   swk_focus_prev },
 	{ Ctrl,  8 ,   swk_column_move_left },
-	{ Ctrl,  12 ,   swk_column_move_right },
+	{ Ctrl, 12 ,   swk_column_move_right },
 	{   0 ,  9 ,   swk_focus_next },
 	{ Ctrl, 10 ,   swk_focus_next },
 	{ Ctrl, 11 ,   swk_focus_prev },

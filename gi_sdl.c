@@ -190,8 +190,8 @@ swk_gi_event(SwkWindow *w, int dowait) {
 		mousedowny = TOUCHSCREEN?-1:event.button.y;
 		break;
 	case SDL_KEYDOWN:
-		ret->data.key.modmask = 0;
 		ret->type = EKey;
+		ret->data.key.modmask = 0;
 		if(event.key.keysym.mod & KMOD_CTRL)
 			ret->data.key.modmask |= Ctrl;
 		if(event.key.keysym.mod & KMOD_SHIFT)

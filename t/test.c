@@ -78,7 +78,7 @@ static void mybutton_about(SwkEvent *e) {
 	}
 	swk_button(e);
 }
-//---------
+
 static SwkBox scrollwin[] = {
 	SWK_BOX_NEWLINE(0),
 	{ .cb=swk_label, .text="Scroll to change value", },

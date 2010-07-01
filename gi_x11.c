@@ -1,6 +1,7 @@
 /* See LICENSE file for copyright and license details. */
 #define _BSD_SOURCE // strdup
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <locale.h>
@@ -12,13 +13,10 @@
 #include "config.h"
 
 #define FONTNAME "-*-*-medium-*-*-*-14-*-*-*-*-*-*-*"
-#define FONTFACTOR 2 /* XXX */
 
 static Drawable drawable;
-static GC gc;
 static int fs = FONTSIZE; // TODO: we need fsW and fsH
 static Window window;
-static XFontSet set;
 static int screen;
 static Display *display = NULL;
 static int has_event = 0;
@@ -38,7 +36,7 @@ swk_gi_init(SwkWindow *w) {
 	if(first) {
 		first = 0;
 		display = XOpenDisplay(NULL);
-		if (display == NULL) {
+		if(display == NULL) {
 			fprintf(stderr, "Cannot open display\n");
 			return 0;
 		}
@@ -48,7 +46,6 @@ swk_gi_init(SwkWindow *w) {
 			10, 10, w->r.w, w->r.h, 1,
 			BlackPixel(display, screen),
 			WhitePixel(display, screen));
-		gc = XCreateGC(display, window, 0, NULL);
 		drawable = XCreatePixmap(display, window, w->r.w, w->r.h, DefaultDepth(display, screen));
 		XSelectInput(display, window, EVENTMASK);
 		XMapWindow(display, window);
@@ -90,14 +87,10 @@ swk_gi_event(SwkWindow *w, int dowait) {
 
 	if(has_event);
 	switch(event.type) {
-	default: ret = NULL; break;
 	case Expose:
 		ret->type = EExpose;
 		ret->data.expose.x = ret->data.expose.y = \
 		ret->data.expose.w = ret->data.expose.h = 0;
-		break;
-	case VisibilityNotify:
-		printf("visi\n");
 		break;
 	case MotionNotify:
 		// TODO: move this stuff into swk.c.. shoudlnt be backend dependent
@@ -150,24 +143,34 @@ swk_gi_event(SwkWindow *w, int dowait) {
 		mousedowny = event.xbutton.y;
 		break;
 	case KeyPress:
-		printf ("KEY PRESSED\n");
-		ret->data.key.modmask = 0;
 		ret->type = EKey;
-		//num = XLookupString(&event, buf, sizeof buf, &ksym, NULL);
-		XLookupString(&event, NULL, 0, &ksym, NULL);
-printf("ksym=%d\n", ksym);
-		ret->data.key.keycode = ksym;
+		XLookupString(&event.xkey, NULL, 0, &ksym, NULL);
+		printf("ksym=%d\n", (int)ksym);
+		switch(ksym) {
+		case XK_BackSpace:
+			ret->data.key.keycode = 8;
+			break;
+		case XK_Return:
+			ret->data.key.keycode = '\n';
+			break;
+		default:
+			ret->data.key.keycode = ksym;
+		}
+		ret->data.key.modmask = 0;
 		if(event.xkey.state&ShiftMask)
 			ret->data.key.modmask |= Shift;
 		if(event.xkey.state&Mod1Mask)
 			ret->data.key.modmask |= Alt;
 		if(event.xkey.state&ControlMask)
 			ret->data.key.modmask |= Ctrl;
-		fprintf(stderr, "event: key %d %d\n", 
-			ret->data.key.modmask, ret->data.key.keycode);
+		fprintf(stderr, "event: key %d %d (%c)\n", 
+			ret->data.key.modmask, ret->data.key.keycode, ret->data.key.keycode);
 		break;
 	case 0://SDL_QUIT:
 		ret->type = EQuit;
+		break;
+	default:
+		ret = NULL;
 		break;
 	}
 	has_event = 0;
@@ -225,7 +228,7 @@ void
 swk_gi_text(Rect r, const char *text) {
 	if(!text||!*text)
 		return;
-	XDrawString(display, window, DefaultGC(display, screen), r.x*fs, (1+r.y)*fs, text, strlen (text));
+	XDrawString(display, window, DefaultGC(display, screen), r.x*fs, ((1+r.y)*fs)-3, text, strlen (text));
 }
 
 void

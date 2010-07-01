@@ -235,14 +235,6 @@ swk_handle_event(SwkEvent *e) {
 				break;
 			}
 		}
-		/* XXX: this must be implemented in app? .. sure */
-		if(e->data.key.keycode==27) {
-			e->box = e->win->box;
-			e->type = EQuit;
-			swk_exit(e->win);
-			break;
-		}
-		// send key to focused box
 		e->box = e->win->box;
 		if(e->win->box)
 			e->win->box->cb(e);
@@ -260,7 +252,7 @@ swk_handle_event(SwkEvent *e) {
 		}
 		break;
 	case EClick:
-		// TODO: do this needs to be in config.h?
+		// TODO: move click events in config.h
 		switch(e->data.click.button) {
 		case 4:
 			swk_scroll_up(e->win);
