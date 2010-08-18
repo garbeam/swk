@@ -51,6 +51,13 @@ install:
 	mkdir -p ${DESTDIR}/${LIBDIR}/pkgconfig
 	cp swk.pc ${DESTDIR}/${LIBDIR}/pkgconfig/swk.pc
 
+deinstall uninstall:
+	rm -f ${DESTDIR}/${INCDIR}/swk.h
+	rm -f ${DESTDIR}/${LIBDIR}/libswk.a
+	rm -f ${DESTDIR}/${LIBDIR}/libswk.so
+	rm -f ${DESTDIR}/${LIBDIR}/mk/swk.mk
+	rm -f ${DESTDIR}/${LIBDIR}/pkgconfig/swk.pc
+
 static: libswk.a
 
 shared: libswk.so

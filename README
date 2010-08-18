@@ -3,8 +3,20 @@ SWK - simple widget kit
 swk is a minimalist widget kit with support for SDL and X11
 
 
+How to build for SDL:
+---------------------
+make PREFIX=/usr
+sudo make install PREFIX=/usr
+
+
+How to build for X11:
+---------------------
+make x PREFIX=/usr
+sudo make install PREFIX=/usr
+
+
 Requirements
-============
+------------
 In order to build swk you need SDL, SDL-ttf and SDL-image
 
 ArchLinux:     pacman -S sdl sdl_ttf sdl_image

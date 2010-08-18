@@ -525,8 +525,11 @@ swk_image_free(SwkBox *b) {
 
 void
 swk_image(SwkEvent *e) {
-	if(e->box->data == NULL)
+	if(e->box->data == NULL) {
 		e->box->data = swk_gi_img_load(e->box->text);
+		if(e->box->data)
+			fprintf(stderr, "Cannot find image %s\n", e->box->text);
+	}
 	switch(e->type) {
 	case EExpose:
 		if (e->box->data)
