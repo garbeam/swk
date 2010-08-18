@@ -1,13 +1,8 @@
 .PHONY: all t clean install
-CC?=gcc
-CFLAGS?=-Wall -g -std=c99
-VERSION=0.1
-DESTDIR?=
-PREFIX?=${DESTDIR}/usr/local
-INCDIR?=${PREFIX}/include
-LIBDIR?=${PREFIX}/lib
-CFLAGS+=-I.
 
+-include config.mk
+
+VERSION=0.1
 # graphic backend
 GI?=sdl
 ifeq (${GI},sdl)
@@ -21,19 +16,22 @@ endif
 GI_OBJS=gi_${GI}.o
 GI_SRCS=gi_${GI}.c
 
-all: static shared t
+all: config.mk static shared t
 
-x:
+x: config.mk
 	make clean ; make GI=x11 && cd t ; ./test
 
-s:
+s: config.mk
 	make clean ; make GI=sdl && cd t ; ./test
 
-t:
+t: config.mk
 	cd t && ${MAKE} all
 
 config.h:
 	cp config.def.h config.h
+
+config.mk: config.h
+	cp config.def.mk config.mk
 
 clean:
 	echo >swk.mk
@@ -62,12 +60,12 @@ static: libswk.a
 
 shared: libswk.so
 
-libswk.so: config.h swk.o ${GI_OBJS}
+libswk.so: config.mk swk.o ${GI_OBJS}
 	${CC} ${CFLAGS} -fPIC -shared swk.c ${GI_SRCS} -o libswk.so
 
-swk.o: config.h
+swk.o: config.mk
 
-libswk.a: config.h swk.o ${GI_OBJS}
+libswk.a: config.mk swk.o ${GI_OBJS}
 	rm -f libswk.a
 	ar qcvf libswk.a swk.o ${GI_OBJS}
 	echo SWKINCS+=-I${PREFIX}/include > swk.mk

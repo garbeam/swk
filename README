@@ -3,16 +3,12 @@ SWK - simple widget kit
 swk is a minimalist widget kit with support for SDL and X11
 
 
-How to build for SDL:
----------------------
-make PREFIX=/usr
-sudo make install PREFIX=/usr
+How to build
+------------
+supported backends are: x11, sdl
 
-
-How to build for X11:
----------------------
-make x PREFIX=/usr
-sudo make install PREFIX=/usr
+	make GI=x11 PREFIX=/usr
+	sudo make install
 
 
 Requirements
