@@ -17,7 +17,7 @@ ui: ui.o
 	${CC} ${SWKLIBS} ui.o -o ui ../libswk.a
 
 clean:
-	rm -f test test.o ui ui.o tlock tlock.o
+	rm -f calc calc.o test test.o ui ui.o tlock tlock.o
 
 fun:
 	cd .. && make clean ; make && cd t && ./test
