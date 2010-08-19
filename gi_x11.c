@@ -69,9 +69,7 @@ swk_gi_exit() {
 
 int
 swk_gi_has_event(SwkWindow *w) {
-	if(!has_event)
-		has_event = XNextEvent(display, &lastev); // XXX This must be nonblocking
-	return has_event;
+	return (has_event = XCheckMaskEvent(display, AnyEvent, &lastev));
 }
 
 SwkEvent *
