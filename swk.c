@@ -200,11 +200,6 @@ swk_fit() {
 	}
 }
 
-int
-swk_has_event() { // XXX: remove this useless wrap
-	return swk_gi_has_event(w);
-}
-
 void
 swk_focus_activate() {
 	w->_e.box = w->box;

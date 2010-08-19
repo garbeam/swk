@@ -84,7 +84,6 @@ void swk_exit();
 void swk_fit();
 void swk_loop();
 SwkEvent *swk_next_event();
-int swk_has_event();
 void swk_handle_event(SwkEvent *e);
 
 void swk_focus_first();
@@ -116,7 +115,6 @@ int swk_gi_init(SwkWindow *w);
 void swk_gi_exit();
 SwkEvent *swk_gi_event(SwkWindow *w, int dowait);
 int swk_gi_update(SwkWindow *w);
-int swk_gi_has_event(SwkWindow *w);
 int swk_gi_fontsize(int sz);
 
 /* FIXME: don't these need SwkWindow *w state, to avoid static'ness? */

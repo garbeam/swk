@@ -109,13 +109,6 @@ swk_gi_exit() {
 	SDL_Quit();
 }
 
-int
-swk_gi_has_event(SwkWindow *w) {
-	if(!has_event)
-		has_event = SDL_PollEvent(&lastev);
-	return has_event;
-}
-
 SwkEvent *
 swk_gi_event(SwkWindow *w, int dowait) {
 	static int mousedowny, mousedownx, mousedown = 0;

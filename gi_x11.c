@@ -19,8 +19,6 @@ static int fs = FONTSIZE; // TODO: we need fsW and fsH
 static Window window;
 static int screen;
 static Display *display = NULL;
-static int has_event = 0;
-static XEvent lastev;
 static int first = 1;
 #define EVENTMASK PointerMotionMask | ExposureMask | KeyPressMask | ButtonPressMask | ButtonReleaseMask
 
@@ -67,11 +65,6 @@ swk_gi_exit() {
 	XCloseDisplay(display);
 }
 
-int
-swk_gi_has_event(SwkWindow *w) {
-	return (has_event = XCheckMaskEvent(display, AnyEvent, &lastev));
-}
-
 SwkEvent *
 swk_gi_event(SwkWindow *w, int dowait) {
 	static int mousedowny, mousedownx, mousedown = 0;
@@ -80,10 +73,8 @@ swk_gi_event(SwkWindow *w, int dowait) {
 	XEvent event;
 	SwkEvent *ret = &w->_e;
 
-	if(has_event) event = lastev;
-	else has_event = !XNextEvent(display, &event);
-
-	if(has_event);
+	if(!XCheckMaskEvent(display, AnyEvent, &event))
+		return NULL;
 	switch(event.type) {
 	case Expose:
 		ret->type = EExpose;
@@ -171,7 +162,6 @@ swk_gi_event(SwkWindow *w, int dowait) {
 		ret = NULL;
 		break;
 	}
-	has_event = 0;
 	return ret;
 }
 
