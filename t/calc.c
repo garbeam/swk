@@ -24,6 +24,7 @@ static void button(SwkEvent *e) {
 			pd = popen(buffer2, "r");
 			fgets(buffer, sizeof(buffer), pd);
 			bufferi = strlen(buffer)-1;
+			buffer[bufferi] = 0;
 			pclose(pd);
 			}
 			break;
@@ -64,6 +65,7 @@ static SwkBox contents[] = {
 	{ .cb=button, .text="*" },
 	SWK_BOX_NEWLINE(1),
 	{ .cb=swk_separator },
+	{ .cb=button, .text="." },
 	{ .cb=button, .text="=" },
 	{ .cb=NULL }
 };

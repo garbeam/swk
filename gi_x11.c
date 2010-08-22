@@ -50,8 +50,7 @@ swk_gi_init(SwkWindow *w) {
 	char buf[128];
 	if(first) {
 		first = 0;
-		if (!(dc = dc_init()))
-			return 0;
+		dc = dc_init();
 		for(i=0;i<ColorLast;i++) {
 			sprintf(buf, "#%06x", colors[i]);
 			col[i] = dc_color(dc, buf);
