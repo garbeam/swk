@@ -1,5 +1,7 @@
 TODO
 ====
+  * Add thresold to detect click and pan
+  * implement a top bar to mark selected column
   * support multiline text widget
   * support for user-defined input handler
     (when input widget is activated, run xterm -e vim str > text)

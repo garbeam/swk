@@ -8,45 +8,57 @@
 #include <X11/keysym.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#include <draw.h>
 #include "swk.h"
 #define SWK
 #include "config.h"
 
 #define FONTNAME "-*-*-medium-*-*-*-14-*-*-*-*-*-*-*"
+//#define FONTNAME "10x20"
 
-static Drawable drawable;
 static int fs = FONTSIZE; // TODO: we need fsW and fsH
 static Window window;
-static int screen;
-static Display *display = NULL;
 static int first = 1;
+static DC *dc = NULL;
+static int col[ColorLast];
+static int colors[ColorLast] = { FGCOLOR, BGCOLOR, HICOLOR, TFCOLOR };
 #define EVENTMASK PointerMotionMask | ExposureMask | KeyPressMask | ButtonPressMask | ButtonReleaseMask
 
 int
 swk_gi_fontsize(int sz) {
 	fs += sz*2;
-	/* TODO */
+	/* TODO: resize font */
 	return 1;
+}
+
+static Window dc_window(DC *dc, int x, int y, int w, int h) {
+	Drawable drawable;
+	Window window;
+	int screen = DefaultScreen(dc->dpy);
+	window = XCreateSimpleWindow(dc->dpy, RootWindow(dc->dpy, screen),
+		x, y, w, h, 1, col[ColorBG], col[ColorFG]);
+	drawable = XCreatePixmap(dc->dpy, window, w, h,
+		DefaultDepth(dc->dpy, screen));
+	XSelectInput(dc->dpy, window, EVENTMASK);
+	XMapWindow(dc->dpy, window);
+	return window;
 }
 
 int
 swk_gi_init(SwkWindow *w) {
+	int i;
+	char buf[128];
 	if(first) {
 		first = 0;
-		display = XOpenDisplay(NULL);
-		if(display == NULL) {
-			fprintf(stderr, "Cannot open display\n");
+		if (!(dc = dc_init()))
 			return 0;
+		for(i=0;i<ColorLast;i++) {
+			sprintf(buf, "#%06x", colors[i]);
+			col[i] = dc_color(dc, buf);
 		}
-		screen = DefaultScreen(display);
-		window = XCreateSimpleWindow(display,
-			RootWindow(display, screen),
-			10, 10, w->r.w, w->r.h, 1,
-			BlackPixel(display, screen),
-			WhitePixel(display, screen));
-		drawable = XCreatePixmap(display, window, w->r.w, w->r.h, DefaultDepth(display, screen));
-		XSelectInput(display, window, EVENTMASK);
-		XMapWindow(display, window);
+		dc_font(dc, FONTNAME);
+		// TODO: must be dc_window(dc, x, y, w, h, bg, fg)
+		window = dc_window(dc, 10, 10, w->r.w, w->r.h);
 	}
 	return swk_gi_fontsize(0);
 }
@@ -54,7 +66,7 @@ swk_gi_init(SwkWindow *w) {
 int
 swk_gi_update(SwkWindow *w) {
 	XWindowAttributes wa;
-	XGetWindowAttributes(display, window, &wa);
+	XGetWindowAttributes(dc->dpy, window, &wa);
 	w->r.w = (wa.width / fs)-1;
 	w->r.h = (wa.height / fs)-1;
 	return 1;
@@ -62,7 +74,7 @@ swk_gi_update(SwkWindow *w) {
 
 void
 swk_gi_exit() {
-	XCloseDisplay(display);
+	dc_free(dc);
 }
 
 SwkEvent *
@@ -73,7 +85,7 @@ swk_gi_event(SwkWindow *w, int dowait) {
 	XEvent event;
 	SwkEvent *ret = &w->_e;
 
-	if(!XCheckMaskEvent(display, AnyEvent, &event))
+	if(!XCheckMaskEvent(dc->dpy, -1, &event))
 		return NULL;
 	switch(event.type) {
 	case Expose:
@@ -135,7 +147,20 @@ swk_gi_event(SwkWindow *w, int dowait) {
 		ret->type = EKey;
 		XLookupString(&event.xkey, NULL, 0, &ksym, NULL);
 		printf("ksym=%d\n", (int)ksym);
+
 		switch(ksym) {
+		case 65362:
+			ret->data.key.keycode = KUp;
+			break;
+		case 65364:
+			ret->data.key.keycode = KDown;
+			break;
+		case 65361:
+			ret->data.key.keycode = KLeft;
+			break;
+		case 65363:
+			ret->data.key.keycode = KRight;
+			break;
 		case XK_BackSpace:
 			ret->data.key.keycode = 8;
 			break;
@@ -155,7 +180,7 @@ swk_gi_event(SwkWindow *w, int dowait) {
 		fprintf(stderr, "event: key %d %d (%c)\n", 
 			ret->data.key.modmask, ret->data.key.keycode, ret->data.key.keycode);
 		break;
-	case 0://SDL_QUIT:
+	case 0:
 		ret->type = EQuit;
 		break;
 	default:
@@ -167,16 +192,22 @@ swk_gi_event(SwkWindow *w, int dowait) {
 
 void
 swk_gi_clear() {
-	XClearWindow(display, window);
+	Rect r ={0};
+	XWindowAttributes wa;
+	XGetWindowAttributes(dc->dpy, window, &wa);
+	dc_resize(dc, wa.width, wa.height);
+	r.w=wa.width;
+	r.h=wa.height;
+	swk_gi_fill(r, ColorBG, 0);
 }
 
 void
 swk_gi_flip() {
 #if 0
 	XWindowAttributes wa;
-	XGetWindowAttributes(display, window, &wa);
-	XCopyArea(display, drawable, window, gc, 0, 0, wa.width, wa.height, 0, 0);
-	XFlush(display);
+	XGetWindowAttributes(dc->dpy, window, &wa);
+	XCopyArea(dc->dpy, drawable, window, gc, 0, 0, wa.width, wa.height, 0, 0);
+	XFlush(dc->dpy);
 #endif
 }
 
@@ -201,7 +232,8 @@ swk_gi_fill(Rect r, int color, int lil) {
 	}
 	if(!area.width) area.width = 1;
 	if(!area.height) area.height = 1;
-	XFillRectangles(display, window, DefaultGC(display, screen), &area, 1);
+	XSetForeground(dc->dpy, dc->gc, col[color]);
+	XFillRectangles(dc->dpy, window, dc->gc, &area, 1);
 }
 
 void
@@ -216,7 +248,8 @@ void
 swk_gi_text(Rect r, const char *text) {
 	if(!text||!*text)
 		return;
-	XDrawString(display, window, DefaultGC(display, screen), r.x*fs, ((1+r.y)*fs)-3, text, strlen (text));
+	XSetForeground(dc->dpy, dc->gc, col[ColorFG]);
+	XDrawString(dc->dpy, window, dc->gc, r.x*fs, ((1+r.y)*fs)-3, text, strlen (text));
 }
 
 void

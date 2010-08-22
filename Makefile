@@ -9,7 +9,7 @@ ifeq (${GI},sdl)
 GI_LIBS=-lSDL -lSDL_ttf -lSDL_image
 else
 ifeq (${GI},x11)
-GI_LIBS=-lX11
+GI_LIBS=-lX11 -ldraw
 endif
 endif
 

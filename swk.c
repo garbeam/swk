@@ -45,7 +45,7 @@ swk_update() {
 		SwkBox *b = w->boxes[0];
 		swk_fit(w);
 		swk_gi_clear();
-		if (!w->colpos) {
+		if(!w->colpos) {
 			b = w->boxes[1];
 			count--;
 			col = w->r.w;
@@ -53,7 +53,7 @@ swk_update() {
 		for(w->r.w=col; ; b = w->boxes[1]) {
 			swk_fit(w);
 			roy = oy = 0;
-			if (b)
+			if(b)
 			for(;b->cb; b++) {
 				w->_e.box = b;
 				if(IS_SCROLLBOX(b))
@@ -367,6 +367,8 @@ swk_entry(SwkEvent *e) {
 	char *ptr;
 	switch(e->type) {
 	case EKey:
+		if (e->data.key.modmask&Ctrl)
+			return;
 		key = e->data.key.keycode;
 		if(key == 8) {
 			ptr = (char*)malloc(strlen(e->box->text)+2);

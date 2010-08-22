@@ -14,7 +14,7 @@ static void mybutton_about_ok(SwkEvent *e);
 
 static void mybutton(SwkEvent *e) {
 	if(e->type == EClick) {
-		sprintf(text, "Do it again %d times\n", count);
+		sprintf(text, "Do it again %d times", count);
 		helloworld[0].text = text;
 		if(opt == NULL)
 			printf("Option: none\n");

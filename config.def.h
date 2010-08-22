@@ -8,26 +8,28 @@
 #define WINWIDTH 640
 #define WINHEIGHT 480
 #define TOUCHSCREEN 0
-// SDL
+#ifdef FG
+#define SWK_COLOR(r,g,b) 0x##r##g##b
+#else
 #define SWK_COLOR(r,g,b) 0x##r,0x##g,0x##b
-// X11
-//#define SWK_COLOR(r,g,b) r##g##b
+#endif
 
-#define HICOLOR SWK_COLOR(0,66,ff)
+#define HICOLOR SWK_COLOR(00,66,ff)
 #define BGCOLOR SWK_COLOR(20,20,20)
 #define FGCOLOR SWK_COLOR(e0,e0,e0)
 #define TFCOLOR SWK_COLOR(cc,cc,cc)
 
 /* key bindings */
 static SwkKeyBind keys[] = {
+	{ 0, '\n',   swk_focus_activate},
 	{ Ctrl, 'j',   swk_focus_next },
 	{ Ctrl, 'k',   swk_focus_prev },
-	{ Ctrl, 'h' ,   swk_column_move_left },
-	{ Ctrl, 'l',   swk_column_move_right },
 	//{ Ctrl,  8 ,   swk_focus_first },
 	//{ Ctrl,  9 ,   swk_focus_prev },
 	{ Ctrl,  8 ,   swk_column_move_left },
-	{ Ctrl, 12 ,   swk_column_move_right },
+	{ Ctrl,  12 ,   swk_column_move_right },
+	{ Ctrl,  'h' ,   swk_column_move_left },
+	{ Ctrl,  'l',   swk_column_move_right },
 	{   0 ,  9 ,   swk_focus_next },
 	{ Ctrl, 10 ,   swk_focus_next },
 	{ Ctrl, 11 ,   swk_focus_prev },
@@ -38,6 +40,8 @@ static SwkKeyBind keys[] = {
 	{ Ctrl, 12 ,   swk_focus_activate },
 	{ Ctrl|Shift, 10, swk_scroll_down },
 	{ Ctrl|Shift, 11, swk_scroll_up },
+	{ Ctrl|Shift, 'J', swk_scroll_up },
+	{ Ctrl|Shift, 'K', swk_scroll_down },
 	{ Ctrl, '+',   swk_fontsize_increase },
 	{ Ctrl, '-',   swk_fontsize_decrease },
 	{ 0 }

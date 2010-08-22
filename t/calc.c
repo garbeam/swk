@@ -22,8 +22,8 @@ static void button(SwkEvent *e) {
 			static char buffer2[sizeof(buffer)+32];
 			snprintf(buffer2, sizeof(buffer2), "echo '%s' | bc -q", buffer);
 			pd = popen(buffer2, "r");
-			fgets(buffer, sizeof(buffer),pd);
-			bufferi=strlen(buffer)-1;
+			fgets(buffer, sizeof(buffer), pd);
+			bufferi = strlen(buffer)-1;
 			pclose(pd);
 			}
 			break;
