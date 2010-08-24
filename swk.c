@@ -393,7 +393,8 @@ swk_entry(SwkEvent *e) {
 		break;
 	case EExpose:
 		// XXX: add support for cursor (handle arrow keys)
-		len = e->box->r.x+(strlen(e->box->text)*0.7);
+		len = strlen(e->box->text);
+		len += e->box->r.x;
 		swk_label(e);
 		swk_gi_line(len, e->box->r.y, 0, 1, ColorFG);
 		break;
@@ -409,6 +410,7 @@ swk_button(SwkEvent *e) {
 		r.x++;
 		swk_gi_text(r, e->box->text);
 		r.x--;
+		r.w--;
 		if(e->win->box == e->box)
 			swk_gi_rect(r, ColorHI);
 		else swk_gi_rect(r, ColorFG);
@@ -425,11 +427,12 @@ swk_bigbutton(SwkEvent *e) {
 	case EExpose:
 		e->box->r.h = 3;
 		r = e->box->r;
-		r.x += 2;
+		r.x += 3;
 		r.y += 1;
 		swk_gi_text(r, e->box->text);
 		r.y -= 1;
-		r.x -= 2;
+		r.x -= 1;
+		r.w--;
 		if(e->win->box == e->box)
 			swk_gi_rect(r, ColorHI);
 		else swk_gi_rect(r, ColorFG);

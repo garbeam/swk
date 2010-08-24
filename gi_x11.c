@@ -18,7 +18,7 @@
 
 static int fs = FONTSIZE; // TODO: we need fsW and fsH
 static Window window;
-static int first = 1;
+static XWindowAttributes wa;
 static DC *dc = NULL;
 static int col[ColorLast];
 static int colors[ColorLast] = { FGCOLOR, BGCOLOR, HICOLOR, TFCOLOR };
@@ -32,13 +32,10 @@ swk_gi_fontsize(int sz) {
 }
 
 static Window dc_window(DC *dc, int x, int y, int w, int h) {
-	Drawable drawable;
 	Window window;
 	int screen = DefaultScreen(dc->dpy);
 	window = XCreateSimpleWindow(dc->dpy, RootWindow(dc->dpy, screen),
 		x, y, w, h, 1, col[ColorBG], col[ColorFG]);
-	drawable = XCreatePixmap(dc->dpy, window, w, h,
-		DefaultDepth(dc->dpy, screen));
 	XSelectInput(dc->dpy, window, EVENTMASK);
 	XMapWindow(dc->dpy, window);
 	return window;
@@ -46,19 +43,17 @@ static Window dc_window(DC *dc, int x, int y, int w, int h) {
 
 int
 swk_gi_init(SwkWindow *w) {
-	int i;
 	char buf[128];
-	if(first) {
-		first = 0;
-		dc = dc_init();
-		for(i=0;i<ColorLast;i++) {
-			sprintf(buf, "#%06x", colors[i]);
-			col[i] = dc_color(dc, buf);
-		}
-		dc_font(dc, FONTNAME);
-		// TODO: must be dc_window(dc, x, y, w, h, bg, fg)
-		window = dc_window(dc, 10, 10, w->r.w, w->r.h);
+	int i;
+	if (dc) return 0;
+	dc = dc_init();
+	for(i=0;i<ColorLast;i++) {
+		sprintf(buf, "#%06x", colors[i]);
+		col[i] = dc_color(dc, buf);
 	}
+	dc_font(dc, FONTNAME);
+	// TODO: must be dc_window(dc, x, y, w, h, bg, fg)
+	window = dc_window(dc, 10, 10, w->r.w, w->r.h);
 	return swk_gi_fontsize(0);
 }
 
@@ -74,6 +69,7 @@ swk_gi_update(SwkWindow *w) {
 void
 swk_gi_exit() {
 	dc_free(dc);
+	dc = NULL;
 }
 
 SwkEvent *
@@ -84,7 +80,7 @@ swk_gi_event(SwkWindow *w, int dowait) {
 	XEvent event;
 	SwkEvent *ret = &w->_e;
 
-	if(!XCheckMaskEvent(dc->dpy, -1, &event))
+	if(!XCheckMaskEvent(dc->dpy, 0xffff, &event))
 		return NULL;
 	switch(event.type) {
 	case Expose:
@@ -189,25 +185,18 @@ swk_gi_event(SwkWindow *w, int dowait) {
 	return ret;
 }
 
-void
 swk_gi_clear() {
-	Rect r ={0};
-	XWindowAttributes wa;
+	Rect r = {0};
 	XGetWindowAttributes(dc->dpy, window, &wa);
 	dc_resize(dc, wa.width, wa.height);
-	r.w=wa.width;
-	r.h=wa.height;
+	r.w = wa.width; // TODO: propagate those values into SwkWindow?
+	r.h = wa.height;
 	swk_gi_fill(r, ColorBG, 0);
 }
 
 void
 swk_gi_flip() {
-#if 0
-	XWindowAttributes wa;
-	XGetWindowAttributes(dc->dpy, window, &wa);
-	XCopyArea(dc->dpy, drawable, window, gc, 0, 0, wa.width, wa.height, 0, 0);
-	XFlush(dc->dpy);
-#endif
+	dc_map(dc, window, wa.width, wa.height);
 }
 
 /* -- drawing primitives -- */
@@ -223,16 +212,16 @@ void
 swk_gi_fill(Rect r, int color, int lil) {
 	XRectangle area = { r.x*fs, r.y*fs, r.w*fs, r.h*fs };
 	if(lil) {
-		const int s = fs/4;
+		int s = fs/4;
 		area.x += s;
 		area.y += s;
 		area.width -= (s*2);
 		area.height -= (s*2);
 	}
-	if(!area.width) area.width = 1;
-	if(!area.height) area.height = 1;
+	if(area.width<1) area.width = 1;
+	if(area.height<1) area.height = 1;
 	XSetForeground(dc->dpy, dc->gc, col[color]);
-	XFillRectangles(dc->dpy, window, dc->gc, &area, 1);
+	XFillRectangles(dc->dpy, dc->canvas, dc->gc, &area, 1);
 }
 
 void
@@ -248,7 +237,7 @@ swk_gi_text(Rect r, const char *text) {
 	if(!text||!*text)
 		return;
 	XSetForeground(dc->dpy, dc->gc, col[ColorFG]);
-	XDrawString(dc->dpy, window, dc->gc, r.x*fs, ((1+r.y)*fs)-3, text, strlen (text));
+	XDrawString(dc->dpy, dc->canvas, dc->gc, 5+r.x*fs, ((1+r.y)*fs)-3, text, strlen (text));
 }
 
 void
