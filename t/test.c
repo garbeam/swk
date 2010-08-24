@@ -79,10 +79,19 @@ static void mybutton_about(SwkEvent *e) {
 	swk_button(e);
 }
 
+static void mybutton_close(SwkEvent *e) {
+	if(e->type == EClick) {
+		e->win->boxes[e->win->col] = helloworld;
+		swk_update(e->win);
+	}
+	swk_button(e);
+}
+
 static SwkBox scrollwin[] = {
 	SWK_BOX_NEWLINE(0),
 	{ .cb=swk_label, .text="Scroll to change value", },
 	SWK_BOX_NEWLINE(1),
+	{ .cb=mybutton_close, .text="Close" },
 	{ .cb=swk_separator },
 	SWK_BOX_NEWLINE(1),
 	{ .cb=swk_label, .text="  /etc" },

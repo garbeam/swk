@@ -13,7 +13,7 @@
 #define SDLFLAGS SDL_DOUBLEBUF|SDL_RESIZABLE
 
 static int first = 1;
-static int fs = FONTSIZE; // TODO: we need fsW and fsH
+static int fs = FONTSIZE;
 static Uint32 pal[ColorLast];
 static SDL_Color fontcolor = { TFCOLOR };
 static SDL_Color bgcolor = { BGCOLOR };
@@ -245,12 +245,17 @@ swk_gi_line(int x1, int y1, int x2, int y2, int color) {
 void
 swk_gi_fill(Rect r, int color, int lil) {
 	SDL_Rect area = { r.x*fs, r.y*fs, r.w*fs, r.h*fs };
-	if(lil) {
+	if(lil==1) {
 		const int s = fs/4;
 		area.x += s;
 		area.y += s;
 		area.w -= (s*2);
 		area.h -= (s*2);
+	} else if (lil==2) {
+		area.x/=4;
+		area.y+=4;
+		area.w/=4;
+		area.h-=4;
 	}
 	if(!area.w) area.w = 1;
 	if(!area.h) area.h = 1;

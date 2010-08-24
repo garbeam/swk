@@ -7,9 +7,11 @@ VERSION=0.1
 GI?=sdl
 ifeq (${GI},sdl)
 GI_LIBS=-lSDL -lSDL_ttf -lSDL_image
+CFLAGS+=-DUSE_SDL
 else
 ifeq (${GI},x11)
 GI_LIBS=-lX11 -ldraw
+CFLAGS+=-DUSE_X11
 endif
 endif
 

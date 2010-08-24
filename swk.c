@@ -394,10 +394,18 @@ swk_entry(SwkEvent *e) {
 		break;
 	case EExpose:
 		// XXX: add support for cursor (handle arrow keys)
-		len = strlen(e->box->text);
-		len += e->box->r.x;
+	#ifdef USE_SDL
+		len = 4*e->box->r.x;
+		len += 2*strlen(e->box->text)+1;
+	#else
+		len = 3*e->box->r.x;
+		len += strlen(e->box->text)+1;
+	#endif
 		swk_label(e);
-		swk_gi_line(len, e->box->r.y, 0, 1, ColorFG);
+		{
+		Rect r = {len, e->box->r.y, 1, 1 };
+		swk_gi_fill(r, ColorFG, 2);
+		}
 		break;
 	}
 }
@@ -522,12 +530,12 @@ void
 swk_image(SwkEvent *e) {
 	if(e->box->data == NULL) {
 		e->box->data = swk_gi_img_load(e->box->text);
-		if(e->box->data)
+		if(!e->box->data)
 			fprintf(stderr, "Cannot find image %s\n", e->box->text);
 	}
 	switch(e->type) {
 	case EExpose:
-		swk_gi_rect(e->box->r, BORDERCOLOR);
+		swk_gi_rect(e->box->r, ColorFG);
 		if(e->win->box == e->box) {
 			Rect r = e->box->r;
 			swk_gi_line(r.x, r.y+1, r.w, 0, ColorHI);

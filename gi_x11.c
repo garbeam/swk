@@ -211,12 +211,18 @@ swk_gi_line(int x1, int y1, int x2, int y2, int color) {
 void
 swk_gi_fill(Rect r, int color, int lil) {
 	XRectangle area = { r.x*fs, r.y*fs, r.w*fs, r.h*fs };
-	if(lil) {
+	if(lil==1) {
 		int s = fs/4;
 		area.x += s;
 		area.y += s;
 		area.width -= (s*2);
 		area.height -= (s*2);
+	} else
+	if(lil==2) {
+		area.x/=3;
+		area.width/=4;
+		area.y+=4;
+		area.height-=4;
 	}
 	if(area.width<1) area.width = 1;
 	if(area.height<1) area.height = 1;
