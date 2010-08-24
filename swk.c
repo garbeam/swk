@@ -5,6 +5,7 @@
 #include "swk.h"
 #include "config.h"
 
+#define BORDERCOLOR ((e->win->box==e->box)?ColorHI:ColorFG)
 static void setscrollbox(int delta);
 static SwkWindow *w = NULL;
 static int running = 0;
@@ -411,9 +412,7 @@ swk_button(SwkEvent *e) {
 		swk_gi_text(r, e->box->text);
 		r.x--;
 		r.w--;
-		if(e->win->box == e->box)
-			swk_gi_rect(r, ColorHI);
-		else swk_gi_rect(r, ColorFG);
+		swk_gi_rect(r, BORDERCOLOR);
 		break;
 	default:
 		break;
@@ -427,15 +426,13 @@ swk_bigbutton(SwkEvent *e) {
 	case EExpose:
 		e->box->r.h = 3;
 		r = e->box->r;
-		r.x += 3;
-		r.y += 1;
+		r.x += 2;
+		r.y++;
 		swk_gi_text(r, e->box->text);
-		r.y -= 1;
-		r.x -= 1;
+		r.x--;
+		r.y--;
 		r.w--;
-		if(e->win->box == e->box)
-			swk_gi_rect(r, ColorHI);
-		else swk_gi_rect(r, ColorFG);
+		swk_gi_rect(r, BORDERCOLOR);
 		break;
 	default:
 		break;
@@ -482,9 +479,7 @@ swk_separator(SwkEvent *e) {
 	switch(e->type) {
 	case EExpose:
 		r = e->box->r;
-		if(e->win->box == e->box)
-			swk_gi_line(r.x, r.y+1, r.w, 0, ColorHI);
-		else swk_gi_line(r.x, r.y+1, r.w, 0, ColorFG);
+		swk_gi_line(r.x, r.y+1, r.w, 0, BORDERCOLOR);
 		break;
 	default:
 		break;
@@ -532,9 +527,7 @@ swk_image(SwkEvent *e) {
 	}
 	switch(e->type) {
 	case EExpose:
-		if (e->box->data)
-			swk_gi_img(e->box->r, e->box->data);
-		else swk_gi_rect(e->box->r, ColorFG);
+		swk_gi_rect(e->box->r, BORDERCOLOR);
 		if(e->win->box == e->box) {
 			Rect r = e->box->r;
 			swk_gi_line(r.x, r.y+1, r.w, 0, ColorHI);
