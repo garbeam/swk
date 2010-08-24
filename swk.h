@@ -7,7 +7,7 @@
 
 typedef enum { EVoid, EClick, EMotion, EKey, EExpose, EQuit, ELast } SwkEventType;
 typedef enum { Shift=1, Ctrl=2, Alt=4, Meta=8 } SwkKeyMod;
-typedef enum { ColorFG, ColorBG, ColorHI, ColorTF, ColorLast } Palete;
+typedef enum { ColorFG, ColorBG, ColorHI, ColorTF, ColorCC, ColorLast } Palete;
 typedef enum { KUp=0xe0, KDown=0xe1, KLeft=0xe2, KRight=0xe3 } SwkKeyCode;
 
 typedef struct SwkBox SwkBox;

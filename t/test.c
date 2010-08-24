@@ -130,7 +130,7 @@ static SwkBox helloworld[] = {
 	{ .cb=swk_image, .text="image.png" },
 	{ .cb=swk_image, .text="image.png" },
 	{ .cb=swk_filler, },
-	SWK_BOX_NEWLINE(2),
+	SWK_BOX_NEWLINE(3),
 	{ .cb=mybutton, .text="yes" },
 	{ .cb=mybutton, .text="no" },
 	{ .cb=swk_filler, },

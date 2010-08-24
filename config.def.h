@@ -8,16 +8,17 @@
 #define WINWIDTH 640
 #define WINHEIGHT 480
 #define TOUCHSCREEN 0
-#ifdef FG
-#define SWK_COLOR(r,g,b) 0x##r##g##b
-#else
+#ifdef USE_SDL
 #define SWK_COLOR(r,g,b) 0x##r,0x##g,0x##b
+#else
+#define SWK_COLOR(r,g,b) 0x##r##g##b
 #endif
 
 #define HICOLOR SWK_COLOR(00,66,ff)
-#define BGCOLOR SWK_COLOR(20,20,20)
+#define BGCOLOR SWK_COLOR(10,10,10)
 #define FGCOLOR SWK_COLOR(e0,e0,e0)
 #define TFCOLOR SWK_COLOR(cc,cc,cc)
+#define CCCOLOR SWK_COLOR(20,20,20)
 
 /* key bindings */
 static SwkKeyBind keys[] = {

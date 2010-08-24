@@ -17,6 +17,8 @@ static int fs = FONTSIZE;
 static Uint32 pal[ColorLast];
 static SDL_Color fontcolor = { TFCOLOR };
 static SDL_Color bgcolor = { BGCOLOR };
+static SDL_Color tfcolor = { TFCOLOR };
+static SDL_Color cccolor = { CCCOLOR };
 static SDL_Surface *screen = NULL;
 static TTF_Font *font = NULL;
 /* FIXME: put ugly statics into void *aux of SwkWindow ? */
@@ -91,6 +93,8 @@ swk_gi_init(SwkWindow *w) {
 	pal[ColorFG] = SDL_MapRGB(screen->format, FGCOLOR);
 	pal[ColorBG] = SDL_MapRGB(screen->format, BGCOLOR);
 	pal[ColorHI] = SDL_MapRGB(screen->format, HICOLOR);
+	pal[ColorTF] = SDL_MapRGB(screen->format, TFCOLOR);
+	pal[ColorCC] = SDL_MapRGB(screen->format, CCCOLOR);
 	return swk_gi_fontsize(0);
 }
 
@@ -256,6 +260,10 @@ swk_gi_fill(Rect r, int color, int lil) {
 		area.y+=4;
 		area.w/=4;
 		area.h-=4;
+	} else if (lil==3) {
+		const int s = fs/4;
+		area.w -= (s*2);
+		area.h -= (s*4);
 	}
 	if(!area.w) area.w = 1;
 	if(!area.h) area.h = 1;
@@ -283,8 +291,9 @@ swk_gi_text(Rect r, const char *text) {
 		}
 		SDL_Surface *ts = TTF_RenderText_Shaded(font, tptr, fontcolor, bgcolor);
 		if(ts) {
-			SDL_Rect to = { (r.x)*fs, r.y*fs, ts->w, ts->h };
-			SDL_BlitSurface(ts, NULL, screen, &to);
+			SDL_Rect from = { 0, 4, ts->w, ts->h-2 };
+			SDL_Rect to = { (r.x)*fs, 2+r.y*fs, ts->w, ts->h-4 };
+			SDL_BlitSurface(ts, &from, screen, &to);
 			SDL_FreeSurface(ts);
 		} else fprintf(stderr, "Cannot render string (%s)\n", text);
 	}

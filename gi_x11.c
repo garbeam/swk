@@ -21,7 +21,7 @@ static Window window;
 static XWindowAttributes wa;
 static DC *dc = NULL;
 static int col[ColorLast];
-static int colors[ColorLast] = { FGCOLOR, BGCOLOR, HICOLOR, TFCOLOR };
+static int colors[ColorLast] = { FGCOLOR, BGCOLOR, HICOLOR, TFCOLOR, CCCOLOR };
 #define EVENTMASK PointerMotionMask | ExposureMask | KeyPressMask | ButtonPressMask | ButtonReleaseMask
 
 int
@@ -223,6 +223,10 @@ swk_gi_fill(Rect r, int color, int lil) {
 		area.width/=4;
 		area.y+=4;
 		area.height-=4;
+	} else if (lil==3) {
+		const int s = fs/4;
+		area.width -= (s*2);
+		area.height -= (s*4);
 	}
 	if(area.width<1) area.width = 1;
 	if(area.height<1) area.height = 1;

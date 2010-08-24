@@ -28,6 +28,31 @@ swk_use(SwkWindow *win) {
 	return 1;
 }
 
+// TODO: merge with clean()
+void
+drawcol(SwkWindow *w) {
+	Rect r = {0};
+	r.h = 1;
+	if (!w->boxes[1]) {
+		r.x = 0;
+		r.y = 0;
+		r.w = w->r.w+2;
+		r.h = w->r.h+2;
+	} else
+	if (!w->col) {
+		r.x = 0;
+		r.y = 0;
+		r.w = w->colpos;
+		r.h = w->r.h+2;
+	} else {
+		r.x = w->colpos;
+		r.y = 0;
+		r.w = 100;
+		r.h = w->r.h+2;
+	}
+	swk_gi_fill(r, ColorCC, 0);
+}
+
 void
 swk_update() {
 	char text[8];
@@ -51,6 +76,7 @@ swk_update() {
 			count--;
 			col = w->r.w;
 		}
+		drawcol(w);
 		for(w->r.w=col; ; b = w->boxes[1]) {
 			swk_fit(w);
 			roy = oy = 0;
@@ -68,7 +94,8 @@ swk_update() {
 					r.w = 3;
 					sprintf(text, "(%d)", scroll);
 					swk_gi_text(r, text);
-					swk_gi_line(--r.x, roy, 2, 0, ColorHI);
+					//swk_gi_line(--r.x, roy, 2, 0, ColorHI);
+					swk_gi_line((b==w->boxes[0])?w->colpos:0, roy, w->r.w, 0, ColorHI);
 				} else b->cb(&w->_e);
 				oy = b->r.y;
 			}
@@ -343,6 +370,7 @@ swk_password(SwkEvent *e) {
 	switch(e->type) {
 	case EExpose:
 		r = e->box->r;
+		swk_gi_fill(r, ColorBG, 1);
 		if(e->win->box == e->box)
 			swk_gi_line(r.x, r.y+1, r.w, 0, ColorHI);
 		len = strlen(e->box->text);
@@ -401,6 +429,7 @@ swk_entry(SwkEvent *e) {
 		len = 3*e->box->r.x;
 		len += strlen(e->box->text)+1;
 	#endif
+		swk_gi_fill(e->box->r, ColorBG, 1);
 		swk_label(e);
 		{
 		Rect r = {len, e->box->r.y, 1, 1 };
@@ -416,11 +445,12 @@ swk_button(SwkEvent *e) {
 	switch(e->type) {
 	case EExpose:
 		r = e->box->r;
+		r.w--;
+		swk_gi_fill(r, ColorBG, 0);
+		swk_gi_rect(r, BORDERCOLOR);
+		r = e->box->r;
 		r.x++;
 		swk_gi_text(r, e->box->text);
-		r.x--;
-		r.w--;
-		swk_gi_rect(r, BORDERCOLOR);
 		break;
 	default:
 		break;
@@ -434,13 +464,16 @@ swk_bigbutton(SwkEvent *e) {
 	case EExpose:
 		e->box->r.h = 3;
 		r = e->box->r;
-		r.x += 2;
-		r.y++;
-		swk_gi_text(r, e->box->text);
 		r.x--;
 		r.y--;
 		r.w--;
+		r = e->box->r;
+		swk_gi_fill(r, ColorBG, 0);
 		swk_gi_rect(r, BORDERCOLOR);
+		r = e->box->r;
+		r.x += 2;
+		r.y++;
+		swk_gi_text(r, e->box->text);
 		break;
 	default:
 		break;
@@ -501,6 +534,7 @@ swk_progress(SwkEvent *e) {
 	switch(e->type) {
 	case EExpose:
 		r = e->box->r;
+		swk_gi_fill(r, ColorBG, 0);
 		r.x+=1;
 		swk_gi_text(r, e->box->text);
 		r.x-=1;
@@ -535,7 +569,8 @@ swk_image(SwkEvent *e) {
 	}
 	switch(e->type) {
 	case EExpose:
-		swk_gi_rect(e->box->r, ColorFG);
+		swk_gi_img(e->box->r, e->box->data);
+//		swk_gi_rect(e->box->r, ColorFG);
 		if(e->win->box == e->box) {
 			Rect r = e->box->r;
 			swk_gi_line(r.x, r.y+1, r.w, 0, ColorHI);
