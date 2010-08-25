@@ -83,11 +83,15 @@ static void animate(SwkWindow *w, int s) {
 		swk_update(w);
 		usleep(10000);
 	}
-	w->col=(w->colpos>0)?1:0;
+	w->colpos=s>0?w->r.w:0;
+	w->col=(s>0)?0:1;
+	w->box=w->boxes[s>0?1:0];
 }
 static void mybutton_about_ok(SwkEvent *e) {
 	if(e->type == EClick) {
-		e->win->boxes[e->win->col] = helloworld;
+		animate(e->win, -1);
+		e->win->boxes[0] = helloworld;
+		animate(e->win, 1);
 		swk_update(e->win);
 	}
 	swk_button(e);
@@ -96,7 +100,7 @@ static void mybutton_about_ok(SwkEvent *e) {
 static void mybutton_about(SwkEvent *e) {
 	if(e->type == EClick) {
 		animate(e->win, -1);
-		e->win->boxes[e->win->col] = about;
+		e->win->boxes[0] = about;
 		swk_update(e->win);
 	}
 	swk_button(e);
@@ -112,7 +116,7 @@ static void mybutton_shrink(SwkEvent *e) {
 
 static void mybutton_close(SwkEvent *e) {
 	if(e->type == EClick) {
-		e->win->boxes[e->win->col] = helloworld;
+		e->win->boxes[0] = helloworld;
 		swk_update(e->win);
 	}
 	swk_button(e);
@@ -124,7 +128,7 @@ static SwkBox scrollwin[] = {
 	SWK_BOX_NEWLINE(1),
 	{ .cb=mybutton_close, .text="Close" },
 	{ .cb=swk_separator },
-	SWK_BOX_NEWLINE(1),
+	SWK_BOX_NEWLINE(2),
 	{ .cb=swk_label, .text="  /etc" },
 	SWK_BOX_NEWLINE(1),
 	{ .cb=swk_button, .text="/bin" },
@@ -136,7 +140,7 @@ static SwkBox scrollwin[] = {
 
 static void mybutton_numscroll(SwkEvent *e) {
 	if(e->type == EClick) {
-		e->win->boxes[e->win->col] = scrollwin;
+		e->win->boxes[0] = scrollwin;
 		swk_update(e->win);
 	}
 	swk_button(e);
@@ -208,6 +212,10 @@ main() {
 	};
 	if(!swk_use(&w))
 		return 1;
+swk_scroll_down();
+swk_scroll_down();
+swk_scroll_down();
+swk_scroll_down();
 	swk_loop();
 	return 0;
 }

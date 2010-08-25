@@ -128,23 +128,22 @@ swk_gi_event(SwkWindow *w, int dowait) {
 		if(!mousemoved) {
 			ret->type = EClick;
 			switch(event.xbutton.state) {
-			case 4096:
+			case 4096: // 0x1000
 				ret->data.click.button = 4;
 				break;
-			case 2048:
+			case 2048: // 0x800
 				ret->data.click.button = 5;
 				break;
-			case 1024:
+			case 1024: // 0x400
 				ret->data.click.button = 2;
 				break;
-			case 512:
+			case 512: // 0x200
 				ret->data.click.button = 3;
 				break;
-			case 256:
+			case 256: // 0x100
 				ret->data.click.button = 1;
 				break;
 			}
-printf ("STATE=%d\n", event.xbutton.state);
 			ret->data.click.point.x = event.xbutton.x / fs;
 			ret->data.click.point.y = event.xbutton.y / fs;
 		}
@@ -294,7 +293,7 @@ swk_gi_img_new(int w, int h, int color) {
 void*
 swk_gi_img_load(const char *str) {
 	/* TODO */
-	return NULL;
+	return (void*)1;
 }
 
 void

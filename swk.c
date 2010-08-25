@@ -61,14 +61,15 @@ swk_update() {
 	if(rendering)
 		return;
 	// TODO: Handle scrollup by widget focus
-	if(w->box->r.y > w->r.h)
-		setscrollbox(-2);
+	//if(w->box->r.y > w->r.h)
+		//setscrollbox(-2);
 	rendering = 1;
 	w->_e.type = EExpose;
 	if(swk_gi_update(w)) {
 		int count = 2;
 		int orw = w->r.w;
 		SwkBox *b = w->boxes[0];
+
 		swk_fit(w);
 		swk_gi_clear();
 		//if(!w->colpos) {
@@ -98,7 +99,7 @@ swk_update() {
 					//swk_gi_line(--r.x, roy, 2, 0, ColorHI);
 					swk_gi_line((b==w->boxes[0])?w->colpos:0, roy, w->r.w, 0, ColorHI);
 				} else b->cb(&w->_e);
-				oy = b->r.y;
+				oy = b->r.h;
 			}
 			if(!w->boxes[1] || !--count)
 				break;
