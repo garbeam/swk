@@ -8,7 +8,7 @@
 typedef enum { EVoid, EClick, EMotion, EKey, EExpose, EQuit, ELast } SwkEventType;
 typedef enum { Shift=1, Ctrl=2, Alt=4, Meta=8 } SwkKeyMod;
 typedef enum { ColorFG, ColorBG, ColorHI, ColorTF, ColorCC, ColorLast } Palete;
-typedef enum { KUp=0xe0, KDown=0xe1, KLeft=0xe2, KRight=0xe3 } SwkKeyCode;
+typedef enum { KDel=8, KSupr=127, KUp=0xe0, KDown=0xe1, KLeft=0xe2, KRight=0xe3 } SwkKeyCode;
 
 typedef struct SwkBox SwkBox;
 typedef struct SwkEvent SwkEvent;
@@ -124,7 +124,7 @@ void swk_gi_flip();
 void swk_gi_line(int x1, int y1, int x2, int y2, int color);
 void swk_gi_fill(Rect r, int color, int lil);
 void swk_gi_rect(Rect r, int color);
-void swk_gi_text(Rect r, const char *text);
+void swk_gi_text(Rect r, const char *t);
 
 /* images */
 void swk_gi_img(Rect r, void *img);
@@ -133,3 +133,36 @@ void* swk_gi_img_load(const char *str);
 void swk_gi_img_free(void *s);
 void swk_gi_img_set(void *img, int x, int y, int color);
 int swk_gi_img_get(void *img, int x, int y);
+
+/* text.c */
+typedef struct {
+	const char *otext;
+	int cur;
+	int xcur;
+	int ycur;
+	char *text;
+	int len;
+	int size;
+	int yscroll;
+	int sel[2];
+	int selmode;
+} Text;
+
+int text_rowcount(Text *t);
+int text_rowoff(Text *t, int row);
+int text_rowcol(Text *t, int off, int *col);
+int text_off(Text *t, int col, int row);
+char * text_sub(Text *t, int col, int row, int rows);
+void text_init(Text *t, const char *text);
+void text_set(Text *t, const char *text);
+char * text_get(Text *t, int from, int to);
+void text_sync(Text *t);
+void text_cur(Text *t, int num, int dir);
+void text_ins(Text *t, const char *str, int app);
+void text_insc(Text *t, char ch, int app);
+void text_del(Text *t, int num, int dir);
+void text_sel(Text *t, int begin, int end);
+void text_sel_mode(Text *t, int enable);
+
+/* text.c widgets */
+void swk_text(SwkEvent *e);

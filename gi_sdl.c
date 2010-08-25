@@ -171,7 +171,6 @@ swk_gi_event(SwkWindow *w, int dowait) {
 		break;
 	case SDL_MOUSEBUTTONUP:
 		//fprintf(stderr, "event: up %d (%d,%d)\n", event.button.button,event.button.x,event.button.y);
-
 		mousedown = 0;
 		if(!mousemoved) {
 			ret->type = EClick;
@@ -199,8 +198,17 @@ swk_gi_event(SwkWindow *w, int dowait) {
 			ret->data.key.modmask |= Meta;
 		if(ret->data.key.keycode != 0 && event.key.keysym.unicode != 0) {
 			ret->data.key.keycode = event.key.keysym.unicode;
-		} else // TODO key aliases defined in config.h
+		}
 		switch((int)event.key.keysym.sym) {
+		case 13:
+			ret->data.key.keycode = '\n';
+			break;
+		case 275:
+			ret->data.key.keycode = KRight;
+			break;
+		case 276:
+			ret->data.key.keycode = KLeft;
+			break;
 		case 1073741906: // n900 up key
 		case 273:
 			ret->data.key.keycode = KUp;

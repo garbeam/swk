@@ -63,6 +63,28 @@ static SwkBox about[] = {
 	{ .cb=NULL }
 };
 
+static void animate(SwkWindow *w, int s) {
+	int i;
+	if(w->colpos<1)
+		w->colpos = 1;
+	if(s<0 && w->colpos>w->r.w)
+		w->colpos=w->r.w;
+	s*=(w->r.w/20);
+	for(i=0;i<100;i++) {
+		if (w->colpos<1) {
+			w->colpos=0;
+			break;
+		}
+		if (w->colpos>w->r.w) {
+			w->colpos=w->r.w;
+			break;
+		}
+		w->colpos+=s;
+		swk_update(w);
+		usleep(10000);
+	}
+	w->col=(w->colpos>0)?1:0;
+}
 static void mybutton_about_ok(SwkEvent *e) {
 	if(e->type == EClick) {
 		e->win->boxes[e->win->col] = helloworld;
@@ -73,7 +95,16 @@ static void mybutton_about_ok(SwkEvent *e) {
 
 static void mybutton_about(SwkEvent *e) {
 	if(e->type == EClick) {
+		animate(e->win, -1);
 		e->win->boxes[e->win->col] = about;
+		swk_update(e->win);
+	}
+	swk_button(e);
+}
+
+static void mybutton_shrink(SwkEvent *e) {
+	if(e->type == EClick) {
+		animate(e->win, 1);
 		swk_update(e->win);
 	}
 	swk_button(e);
@@ -111,6 +142,8 @@ static void mybutton_numscroll(SwkEvent *e) {
 	swk_button(e);
 }
 
+Text txt = {"Hello\nworld\n"};
+
 static SwkBox helloworld[] = {
 	{ .cb=swk_label, .text="Press a button", },
 	SWK_BOX_NEWLINE(1),
@@ -125,6 +158,10 @@ static SwkBox helloworld[] = {
 	{ .cb=swk_label, .text="Click here ->" },
 	{ .cb=swk_sketch },
 	SWK_BOX_NEWLINE(2),
+	{ .cb=swk_label, .text="multiline:" },
+	{ .cb=swk_text, .text="Hello\nWorld\n", .data=&txt, .r.h=4, .r.w=10 },
+	{ .cb=swk_filler, },
+	SWK_BOX_NEWLINE(1),
 	{ .cb=swk_image, .text="image.png" },
 	{ .cb=swk_image, .text="image.png" },
 	{ .cb=swk_image, .text="image.png" },
@@ -151,7 +188,8 @@ static SwkBox helloworld[] = {
 static SwkBox column[] = {
 	{ .cb=swk_label, .text="this is a column", },
 	SWK_BOX_NEWLINE(-1),
-	{ .cb=swk_label, .text="text in column", },
+	{ .cb=mybutton_shrink, .text="shrink", },
+	{ .cb=swk_label, .text="hide this column", },
 	{ .cb=NULL }
 };
 

@@ -71,7 +71,8 @@ swk_update() {
 		SwkBox *b = w->boxes[0];
 		swk_fit(w);
 		swk_gi_clear();
-		if(!w->colpos) {
+		//if(!w->colpos) {
+		if(w->colpos<2) {
 			b = w->boxes[1];
 			count--;
 			col = w->r.w;
@@ -347,13 +348,20 @@ swk_focus_prev() {
 
 void
 swk_label(SwkEvent *e) {
+	char text[128]; // XXX
+	int cut, len;
 	Rect r;
 	switch(e->type) {
 	case EExpose:
 		r = e->box->r;
-		r.w += 6;
-		swk_gi_text(r, e->box->text);
-		r.w -= 6;
+		r.w += 4;
+		cut = r.w*2;
+		strncpy(text, e->box->text, sizeof(text)-1);
+		len = strlen(text);
+		if (len>cut)
+			text[cut]=0;
+		swk_gi_text(r, text);
+		r.w -= 4;
 		if(e->win->box == e->box)
 			swk_gi_line(r.x, r.y+1, r.w, 0, ColorHI);
 		break;
@@ -422,18 +430,24 @@ swk_entry(SwkEvent *e) {
 		break;
 	case EExpose:
 		// XXX: add support for cursor (handle arrow keys)
-	#ifdef USE_SDL
-		len = 4*e->box->r.x;
-		len += 2*strlen(e->box->text)+1;
-	#else
-		len = 3*e->box->r.x;
-		len += strlen(e->box->text)+1;
-	#endif
 		swk_gi_fill(e->box->r, ColorBG, 1);
 		swk_label(e);
-		{
-		Rect r = {len, e->box->r.y, 1, 1 };
-		swk_gi_fill(r, ColorFG, 2);
+		/* cursor */ {
+			int cut = e->box->r.w*2;
+			#ifdef USE_SDL
+			len = 4*e->box->r.x;
+			#else
+			len = 3*e->box->r.x;
+			#endif
+			if (strlen(e->box->text)>cut)
+				len += cut;
+			#ifdef USE_SDL
+			else len += 2*strlen(e->box->text)+1;
+			#else
+			else len += strlen(e->box->text)+1;
+			#endif
+			Rect r = { len, e->box->r.y, 1, 1 };
+			swk_gi_fill(r, ColorFG, 2);
 		}
 		break;
 	}
@@ -565,7 +579,7 @@ swk_image(SwkEvent *e) {
 	if(e->box->data == NULL) {
 		e->box->data = swk_gi_img_load(e->box->text);
 		if(!e->box->data)
-			fprintf(stderr, "Cannot find image %s\n", e->box->text);
+			fprintf(stderr, "Cannot open image %s\n", e->box->text);
 	}
 	switch(e->type) {
 	case EExpose:

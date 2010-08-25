@@ -22,7 +22,7 @@
 
 /* key bindings */
 static SwkKeyBind keys[] = {
-	{ 0, '\n',   swk_focus_activate},
+	{ Ctrl, '\n',   swk_focus_activate},
 	{ Ctrl, 'j',   swk_focus_next },
 	{ Ctrl, 'k',   swk_focus_prev },
 	//{ Ctrl,  8 ,   swk_focus_first },

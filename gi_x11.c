@@ -13,8 +13,8 @@
 #define SWK
 #include "config.h"
 
-#define FONTNAME "-*-*-medium-*-*-*-14-*-*-*-*-*-*-*"
-//#define FONTNAME "10x20"
+//#define FONTNAME "-*-*-medium-*-*-*-14-*-*-*-*-*-*-*"
+#define FONTNAME "10x20"
 
 static int fs = FONTSIZE; // TODO: we need fsW and fsH
 static Window window;
@@ -127,7 +127,24 @@ swk_gi_event(SwkWindow *w, int dowait) {
 		mousedown = 0;
 		if(!mousemoved) {
 			ret->type = EClick;
-			ret->data.click.button = event.xbutton.state;
+			switch(event.xbutton.state) {
+			case 4096:
+				ret->data.click.button = 4;
+				break;
+			case 2048:
+				ret->data.click.button = 5;
+				break;
+			case 1024:
+				ret->data.click.button = 2;
+				break;
+			case 512:
+				ret->data.click.button = 3;
+				break;
+			case 256:
+				ret->data.click.button = 1;
+				break;
+			}
+printf ("STATE=%d\n", event.xbutton.state);
 			ret->data.click.point.x = event.xbutton.x / fs;
 			ret->data.click.point.y = event.xbutton.y / fs;
 		}
@@ -144,6 +161,12 @@ swk_gi_event(SwkWindow *w, int dowait) {
 		printf("ksym=%d\n", (int)ksym);
 
 		switch(ksym) {
+		case 65535: // supr
+			ret->data.key.keycode = 127;
+			break;
+		case 65511:
+			ret->data.key.keycode = KUp;
+			break;
 		case 65362:
 			ret->data.key.keycode = KUp;
 			break;
@@ -220,7 +243,8 @@ swk_gi_fill(Rect r, int color, int lil) {
 	} else
 	if(lil==2) {
 		area.x/=3;
-		area.width/=4;
+		area.x-=2;
+		area.width=2;///=4;
 		area.y+=4;
 		area.height-=4;
 	} else if (lil==3) {
@@ -247,6 +271,11 @@ swk_gi_text(Rect r, const char *text) {
 	if(!text||!*text)
 		return;
 	XSetForeground(dc->dpy, dc->gc, col[ColorFG]);
+//	XmbDrawString(dc->dpy, dc->canvas, dc->font.set, dc->gc, x, y, text, strlen(text));
+	if(dc->font.xfont)
+		XSetFont(dc->dpy, dc->gc, dc->font.xfont->fid);
+	//printf("## %d\n", dc->font.xfont);
+	//XmbDrawString(dc->dpy, dc->canvas, dc->font.set, 5+r.x*fs, ((1+r.y)*fs)-3, text, strlen (text));
 	XDrawString(dc->dpy, dc->canvas, dc->gc, 5+r.x*fs, ((1+r.y)*fs)-3, text, strlen (text));
 }
 
