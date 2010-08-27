@@ -219,13 +219,8 @@ swk_gi_flip() {
 void
 swk_gi_line(int x1, int y1, int x2, int y2, int color) {
 	Rect r = { x1, y1, x2, y2 };
-XXX
 	XSetForeground(dc->dpy, dc->gc, col[color]);
-XDrawLine(dc->dpy, dc->canvas, dc->gc, x1, y1, x2, y2);
-return;
-	if(!x2 || !y2)
-		swk_gi_fill(r, color, 0);
-	// TODO: add support for diagonal lines?
+	XDrawLine(dc->dpy, dc->canvas, dc->gc, x1*fs, y1*fs, (x1+x2)*fs, (y1+y2)*fs);
 }
 
 void
