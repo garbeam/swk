@@ -201,6 +201,7 @@ swk_gi_event(SwkWindow *w, int dowait) {
 	return ret;
 }
 
+void
 swk_gi_clear() {
 	Rect r = {0};
 	XGetWindowAttributes(dc->dpy, window, &wa);
@@ -218,7 +219,6 @@ swk_gi_flip() {
 /* -- drawing primitives -- */
 void
 swk_gi_line(int x1, int y1, int x2, int y2, int color) {
-	Rect r = { x1, y1, x2, y2 };
 	XSetForeground(dc->dpy, dc->gc, col[color]);
 	XDrawLine(dc->dpy, dc->canvas, dc->gc, x1*fs, y1*fs, (x1+x2)*fs, (y1+y2)*fs);
 }
@@ -263,9 +263,10 @@ swk_gi_text(Rect r, const char *text) {
 	if(!text||!*text)
 		return;
 	XSetForeground(dc->dpy, dc->gc, col[ColorFG]);
-	if(dc->font.xfont)
-		XSetFont(dc->dpy, dc->gc, dc->font.xfont->fid);
-	XDrawString(dc->dpy, dc->canvas, dc->gc, 5+r.x*fs, ((1+r.y)*fs)-3, text, strlen (text));
+	// TODO: use libdraw to get length of string and support utf8..
+	// TODO: retrieve character width before rendering
+	XmbDrawString(dc->dpy, dc->canvas, dc->font.set, dc->gc,
+		5+(r.x*fs), ((r.y+1)*fs-3), text, strlen(text));
 }
 
 void

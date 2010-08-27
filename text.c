@@ -95,9 +95,7 @@ text_get(Text *t, int from, int to) {
 	if(to>t->len||to==-1)
 		to = t->len;
 	if (!t->text)
-		if (t->otext)
-			t->text = t->otext;
-		else t->text = "";
+		t->text = strdup((t->otext)?t->otext:"");
 	p = strdup (t->text+from);
 	//if(to!=-1) p[to-from] = '\0';
 	return p;
@@ -188,8 +186,7 @@ text_sel_mode(Text *t, int enable) {
 void
 swk_text(SwkEvent *e) {
 	Text *t = (Text*)e->box->data;
-	int row, len, key;
-	char *ptr;
+	int row, key;
 
 	text_init(e->box->data, e->box->text);
 	text_sync(e->box->data);
@@ -277,7 +274,7 @@ swk_text(SwkEvent *e) {
 			else len += col+1;
 			#endif
 #endif
-			Text* t = e->box->data;
+			//Text* t = e->box->data;
 			text_sync(e->box->data);
 
 			Rect r = { (e->box->r.x*3)+col, e->box->r.y+row, 1, 1};
