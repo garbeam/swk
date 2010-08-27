@@ -31,8 +31,8 @@ static void timepoll() {
 
 static void mylocklabel(SwkEvent *e) {
 	if(e->type == EMotion) {
-		count = 5;
-	}
+		count = 3;
+	} else
 	if(e->type == EExpose) {
 		int pos = e->box->r.y;
 		if(pos<3 || pos>e->win->r.h) {
@@ -47,7 +47,7 @@ static SwkBox contents[] = {
 	{ .cb=swk_label, .text=timestring },
 	{ .cb=swk_separator },
 	SWK_BOX_NEWLINE(-1),
-	SWK_BOX_NEWLINE(4), // Trick to avoid unexpected swkexit
+	SWK_BOX_NEWLINE(6), // Trick to avoid unexpected swkexit
 	{ .cb=mylocklabel, .text="      slide out to unlock", },
 	{ .cb=NULL }
 };

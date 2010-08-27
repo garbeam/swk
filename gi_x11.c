@@ -1,5 +1,4 @@
 /* See LICENSE file for copyright and license details. */
-#define _BSD_SOURCE // strdup
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -24,14 +23,8 @@ static int col[ColorLast];
 static int colors[ColorLast] = { FGCOLOR, BGCOLOR, HICOLOR, TFCOLOR, CCCOLOR };
 #define EVENTMASK PointerMotionMask | ExposureMask | KeyPressMask | ButtonPressMask | ButtonReleaseMask
 
-int
-swk_gi_fontsize(int sz) {
-	fs += sz*2;
-	/* TODO: resize font */
-	return 1;
-}
-
-static Window dc_window(DC *dc, int x, int y, int w, int h) {
+static Window /* TODO: push into libdraw */
+dc_window(DC *dc, int x, int y, int w, int h) {
 	Window window;
 	int screen = DefaultScreen(dc->dpy);
 	window = XCreateSimpleWindow(dc->dpy, RootWindow(dc->dpy, screen),
@@ -39,6 +32,13 @@ static Window dc_window(DC *dc, int x, int y, int w, int h) {
 	XSelectInput(dc->dpy, window, EVENTMASK);
 	XMapWindow(dc->dpy, window);
 	return window;
+}
+
+int
+swk_gi_fontsize(int sz) {
+	fs += sz*2;
+	/* TODO: resize font */
+	return 1;
 }
 
 int
@@ -75,13 +75,13 @@ swk_gi_exit() {
 SwkEvent *
 swk_gi_event(SwkWindow *w, int dowait) {
 	static int mousedowny, mousedownx, mousedown = 0;
-	static int mousemoved = 0;
 	KeySym ksym;
 	XEvent event;
 	SwkEvent *ret = &w->_e;
 
-	if(!XCheckMaskEvent(dc->dpy, 0xffff, &event))
+	if(!dowait && !XPending(dc->dpy))
 		return NULL;
+	XNextEvent(dc->dpy, &event);
 	switch(event.type) {
 	case Expose:
 		ret->type = EExpose;
@@ -92,9 +92,6 @@ swk_gi_event(SwkWindow *w, int dowait) {
 		// TODO: move this stuff into swk.c.. shoudlnt be backend dependent
 //		fprintf(stderr, "event: motion (%d,%d)\n", event.motion.x,event.motion.y);
 		if(mousedown) {
-			// touchscreen spaguetti trick
-			if(mousedowny==-1) mousedowny = event.xmotion.y; else mousemoved = 1;
-			if(mousedownx==-1) mousedownx = event.xmotion.x; else mousemoved = 1;
 			if(event.xmotion.y>mousedowny+fs) {
 				mousedowny = event.xmotion.y;
 				swk_scroll_up(w);
@@ -125,32 +122,29 @@ swk_gi_event(SwkWindow *w, int dowait) {
 	case ButtonRelease:
 		//fprintf(stderr, "event: up %d (%d,%d)\n", event.button.button,event.button.x,event.button.y);
 		mousedown = 0;
-		if(!mousemoved) {
-			ret->type = EClick;
-			switch(event.xbutton.state) {
-			case 4096: // 0x1000
-				ret->data.click.button = 4;
-				break;
-			case 2048: // 0x800
-				ret->data.click.button = 5;
-				break;
-			case 1024: // 0x400
-				ret->data.click.button = 2;
-				break;
-			case 512: // 0x200
-				ret->data.click.button = 3;
-				break;
-			case 256: // 0x100
-				ret->data.click.button = 1;
-				break;
-			}
-			ret->data.click.point.x = event.xbutton.x / fs;
-			ret->data.click.point.y = event.xbutton.y / fs;
+		ret->type = EClick;
+		switch(event.xbutton.state) {
+		case 4096: // 0x1000
+			ret->data.click.button = 4;
+			break;
+		case 2048: // 0x800
+			ret->data.click.button = 5;
+			break;
+		case 1024: // 0x400
+			ret->data.click.button = 2;
+			break;
+		case 512: // 0x200
+			ret->data.click.button = 3;
+			break;
+		case 256: // 0x100
+			ret->data.click.button = 1;
+			break;
 		}
+		ret->data.click.point.x = event.xbutton.x / fs;
+		ret->data.click.point.y = event.xbutton.y / fs;
 		break;
 	case ButtonPress:
 		//fprintf(stderr, "event: down %d (%d,%d)\n", event.button.button,event.button.x,event.button.y);
-		mousemoved = 0;
 		mousedown = 1;
 		mousedowny = event.xbutton.y;
 		break;
@@ -225,6 +219,10 @@ swk_gi_flip() {
 void
 swk_gi_line(int x1, int y1, int x2, int y2, int color) {
 	Rect r = { x1, y1, x2, y2 };
+XXX
+	XSetForeground(dc->dpy, dc->gc, col[color]);
+XDrawLine(dc->dpy, dc->canvas, dc->gc, x1, y1, x2, y2);
+return;
 	if(!x2 || !y2)
 		swk_gi_fill(r, color, 0);
 	// TODO: add support for diagonal lines?
@@ -270,11 +268,8 @@ swk_gi_text(Rect r, const char *text) {
 	if(!text||!*text)
 		return;
 	XSetForeground(dc->dpy, dc->gc, col[ColorFG]);
-//	XmbDrawString(dc->dpy, dc->canvas, dc->font.set, dc->gc, x, y, text, strlen(text));
 	if(dc->font.xfont)
 		XSetFont(dc->dpy, dc->gc, dc->font.xfont->fid);
-	//printf("## %d\n", dc->font.xfont);
-	//XmbDrawString(dc->dpy, dc->canvas, dc->font.set, 5+r.x*fs, ((1+r.y)*fs)-3, text, strlen (text));
 	XDrawString(dc->dpy, dc->canvas, dc->gc, 5+r.x*fs, ((1+r.y)*fs)-3, text, strlen (text));
 }
 
