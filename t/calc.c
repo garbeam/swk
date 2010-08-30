@@ -6,6 +6,8 @@ static int bufferi = 0;
 static char buffer[256];
 
 static void button(SwkEvent *e) {
+	FILE *pd;
+	static char buffer2[sizeof(buffer)+32];
 	if(e->type==EClick) {
 		int key = *e->box->text;
 		switch(key) {
@@ -17,15 +19,13 @@ static void button(SwkEvent *e) {
 				buffer[--bufferi] = 0;
 			break;
 		case '=':
-			{
-			FILE *pd;
-			static char buffer2[sizeof(buffer)+32];
 			snprintf(buffer2, sizeof(buffer2), "echo '%s' | bc -q", buffer);
 			pd = popen(buffer2, "r");
-			fgets(buffer, sizeof(buffer), pd);
-			bufferi = strlen(buffer)-1;
-			buffer[bufferi] = 0;
-			pclose(pd);
+			if(pd) {
+				fgets(buffer, sizeof(buffer), pd);
+				bufferi = strlen(buffer)-1;
+				buffer[bufferi] = 0;
+				pclose(pd);
 			}
 			break;
 		default:
