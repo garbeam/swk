@@ -26,12 +26,14 @@ static int colors[ColorLast] = { FGCOLOR, BGCOLOR, HICOLOR, TFCOLOR, CCCOLOR };
 static Window /* TODO: push into libdraw */
 dc_window(DC *dc, int x, int y, int w, int h) {
 	Window window;
-	int screen = DefaultScreen(dc->dpy);
-	window = XCreateSimpleWindow(dc->dpy, RootWindow(dc->dpy, screen),
+	window = XCreateSimpleWindow(dc->dpy, RootWindow(dc->dpy, DefaultScreen(dc->dpy)),
 		x, y, w, h, 1, col[ColorBG], col[ColorFG]);
 	XSelectInput(dc->dpy, window, EVENTMASK);
 	XMapWindow(dc->dpy, window);
 	return window;
+}
+static void dc_window_title(Window w, const char *title) {
+	XSetStandardProperties(dc->dpy, window, title, NULL, None, NULL, 0, NULL);
 }
 
 int
@@ -54,6 +56,7 @@ swk_gi_init(SwkWindow *w) {
 	dc_font(dc, FONTNAME);
 	// TODO: must be dc_window(dc, x, y, w, h, bg, fg)
 	window = dc_window(dc, 10, 10, w->r.w, w->r.h);
+	dc_window_title(window, w->title);
 	return swk_gi_fontsize(0);
 }
 
@@ -270,35 +273,53 @@ swk_gi_text(Rect r, const char *text) {
 }
 
 void
-swk_gi_img(Rect r, void *img) {
-	/* TODO */
+swk_gi_img(Rect r, void *_img) {
+	SwkImage *img = _img;
+	if(img)
+		XPutImage(dc->dpy, dc->canvas, DefaultGC(dc->dpy, 0), img->pub,
+			0, 0, r.x*fs, r.y*fs, img->w, img->h);
 }
 
-/* image api */
 void*
 swk_gi_img_new(int w, int h, int color) {
-	/* TODO */
-	return NULL;
+	SwkImage *img = img_open(NULL);
+	img->w = w*fs;
+	img->h = h*fs;
+	img->bpp = 24;
+	img->priv = NULL;
+	img->name = NULL;
+	img->data = malloc(img->w*img->h*4);
+	memset(img->data, colors[color]&0xff, img->w*img->h*4);
+	img->pub = XCreateImage(dc->dpy, DefaultVisual(dc->dpy, 0), 24, ZPixmap,
+		0, img->data, img->w, img->h, 32, 0);
+	return img;
 }
 
 void*
 swk_gi_img_load(const char *str) {
-	/* TODO */
-	return (void*)1;
+	SwkImage *img = img_open(str);
+	if (img == NULL)
+		return NULL;
+	img->pub = XCreateImage(dc->dpy, DefaultVisual(dc->dpy, 0), 24, ZPixmap,
+		0, img->data, img->w, img->h, 32, 0);
+	return img;
 }
 
 void
 swk_gi_img_free(void *s) {
-	/* TODO */
+	img_free(s);
 }
 
 void
-swk_gi_img_set(void *img, int x, int y, int color) {
-	/* TODO */
+swk_gi_img_set(void *_img, int x, int y, int color) {
+	SwkImage *img = _img;
+	int *ptr = img->data;
+	if(ptr) ptr[(y*img->w)+x] = color;
 }
 
 int
-swk_gi_img_get(void *img, int x, int y) {
-	/* TODO */
-	return 0;
+swk_gi_img_get(void *_img, int x, int y) {
+	SwkImage *img = _img;
+	int *ptr = img->data;
+	return ptr?ptr[(y*img->w)+x]:0;
 }

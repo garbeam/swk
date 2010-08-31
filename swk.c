@@ -585,7 +585,7 @@ swk_image(SwkEvent *e) {
 	switch(e->type) {
 	case EExpose:
 		swk_gi_img(e->box->r, e->box->data);
-//		swk_gi_rect(e->box->r, ColorFG);
+		//swk_gi_rect(e->box->r, ColorFG);
 		if(e->win->box == e->box) {
 			Rect r = e->box->r;
 			swk_gi_line(r.x, r.y+1, r.w, 0, ColorHI);

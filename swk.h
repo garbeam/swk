@@ -78,6 +78,17 @@ struct SwkWindow {
 	SwkEvent _e;
 };
 
+typedef struct {
+	char* name;
+	int ref;
+	void *data;
+	int bpp;
+	int w;
+	int h;
+	void *priv;
+	void *pub;
+} SwkImage;
+
 int swk_use(SwkWindow *w);
 void swk_update();
 void swk_exit();
@@ -166,3 +177,5 @@ void text_sel_mode(Text *t, int enable);
 
 /* text.c widgets */
 void swk_text(SwkEvent *e);
+SwkImage *img_open(const char *str);
+void img_close(SwkImage *img);

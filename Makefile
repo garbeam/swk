@@ -3,6 +3,7 @@
 -include config.mk
 
 VERSION=0.1
+OBJS=swk.o text.o image.o
 # graphic backend
 GI?=sdl
 ifeq (${GI},sdl)
@@ -10,7 +11,7 @@ GI_LIBS=-lSDL -lSDL_ttf -lSDL_image
 CFLAGS+=-DUSE_SDL
 else
 ifeq (${GI},x11)
-GI_LIBS=-lX11 -ldraw
+GI_LIBS=-lX11 -ldraw -lImlib2
 CFLAGS+=-DUSE_X11
 endif
 endif
@@ -38,7 +39,7 @@ config.mk: config.h
 clean:
 	echo >swk.mk
 	cd t && ${MAKE} clean
-	rm -f swk.pc swk.mk libswk.a libswk.so swk.o text.o ${GI_OBJS}
+	rm -f swk.pc swk.mk libswk.a libswk.so ${OBJS} ${GI_OBJS}
 
 install:
 	mkdir -p ${DESTDIR}/${INCDIR}
@@ -62,14 +63,14 @@ static: libswk.a
 
 shared: libswk.so
 
-libswk.so: config.mk swk.o text.o ${GI_OBJS}
-	${CC} ${CFLAGS} -fPIC -shared swk.c ${GI_SRCS} -o libswk.so
+libswk.so: config.mk ${OBJS} ${GI_OBJS}
+	${CC} ${CFLAGS} -fPIC -shared ${OBJS} ${GI_SRCS} -o libswk.so
 
 swk.o: config.mk
 
-libswk.a: config.mk swk.o text.o ${GI_OBJS}
+libswk.a: config.mk ${OBJS} ${GI_OBJS}
 	rm -f libswk.a
-	ar qcvf libswk.a text.o swk.o ${GI_OBJS}
+	ar qcvf libswk.a ${OBJS} ${GI_OBJS}
 	echo SWKINCS+=-I${PREFIX}/include > swk.mk
 	echo SWKLIB+=${PREFIX}/lib/libswk.a >> swk.mk
 	echo SWKLIBS+=${GI_LIBS} >> swk.mk
