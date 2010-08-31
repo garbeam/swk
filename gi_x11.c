@@ -287,7 +287,7 @@ swk_gi_img_new(int w, int h, int color) {
 	img->h = h*fs;
 	img->bpp = 24;
 	img->priv = NULL;
-	img->name = NULL;
+	*img->name = 0;
 	img->data = malloc(img->w*img->h*4);
 	memset(img->data, colors[color]&0xff, img->w*img->h*4);
 	img->pub = XCreateImage(dc->dpy, DefaultVisual(dc->dpy, 0), 24, ZPixmap,

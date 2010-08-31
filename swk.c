@@ -271,7 +271,7 @@ swk_handle_event(SwkEvent *e) {
 			if(SWK_HIT(b->r, e->data.motion)) {
 				e->win->box = e->box = b;
 				b->cb(e);
-				swk_update();
+//				swk_update();
 				break;
 			}
 		}

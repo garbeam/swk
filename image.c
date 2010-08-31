@@ -1,5 +1,7 @@
 /* See LICENSE file for copyright and license details. */
 #include "swk.h"
+#include <stdlib.h>
+#include <string.h>
 #include <Imlib2.h>
 
 #define MAXIMGS 32
@@ -7,10 +9,9 @@
 
 SwkImage *
 img_open(const char *str) {
-	int x,y;
-	SwkImage *img = malloc(sizeof(SwkImage));
+	SwkImage *img = (SwkImage*)malloc(sizeof(SwkImage));
 	if(str) {
-		img->name = strdup (str);
+		strncpy(img->name, str, sizeof(img->name)-1);
 		img->priv = imlib_load_image (str);
 		imlib_context_set_image ((Imlib_Image*)img->priv);
 		img->w = imlib_image_get_width();
