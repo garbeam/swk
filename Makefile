@@ -1,4 +1,4 @@
-.PHONY: all t clean install
+.PHONY: all rmo t clean install
 
 -include config.mk
 
@@ -36,10 +36,13 @@ config.h:
 config.mk: config.h
 	cp config.def.mk config.mk
 
-clean:
+clean: rmo
 	echo >swk.mk
 	cd t && ${MAKE} clean
-	rm -f swk.pc swk.mk libswk.a libswk.so ${OBJS} ${GI_OBJS}
+	rm -f swk.pc swk.mk libswk.a libswk.so ${GI_OBJS}
+
+rmo:
+	rm -f ${OBJS}
 
 install:
 	mkdir -p ${DESTDIR}/${INCDIR}
@@ -63,12 +66,12 @@ static: libswk.a
 
 shared: libswk.so
 
-libswk.so: config.mk ${OBJS} ${GI_OBJS}
+libswk.so: rmo config.mk ${OBJS} ${GI_OBJS}
 	${CC} ${CFLAGS} -fPIC -shared ${OBJS} ${GI_SRCS} -o libswk.so
 
 swk.o: config.mk
 
-libswk.a: config.mk ${OBJS} ${GI_OBJS}
+libswk.a: rmo config.mk ${OBJS} ${GI_OBJS}
 	rm -f libswk.a
 	ar qcvf libswk.a ${OBJS} ${GI_OBJS}
 	echo SWKINCS+=-I${PREFIX}/include > swk.mk

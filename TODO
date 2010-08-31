@@ -1,5 +1,7 @@
 TODO
 ====
+  * install and load ttf font. allow to override font path
+  * define default image path in config.h
   * change cursor
   * change window title in runtime?
   * how to schedule a function to be executed in N ns?
@@ -19,13 +21,6 @@ TODO
   * add support to resize images (scaling)
   * only focus buttons and entries (input widgets)
     - will make the design inconsistent and the code more complex
-  * allow to load images from memory instead of files
-  * define default image path in config.h
-
-Transitions
-===========
-  * transitions (to change from one window to another)
-    - this can be done in a simple loop() calling swk_update and using colpos
 
 Events
 ======
