@@ -13,7 +13,7 @@
 #include "config.h"
 
 //#define FONTNAME "-*-*-medium-*-*-*-14-*-*-*-*-*-*-*"
-#define FONTNAME "10x20"
+#define FONTNAME "--10x20"
 
 static int fs = FONTSIZE; // TODO: we need fsW and fsH
 static Window window;

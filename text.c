@@ -116,7 +116,7 @@ text_cur(Text *t, int num, int dir) {
 		t->cur = 0;
 	if(t->cur>t->len)
 		t->cur = t->len;
-	if(t->text[t->cur]=='\n')
+	if(dir<0 && t->text[t->cur]=='\n')
 		t->cur+=dir;
 }
 

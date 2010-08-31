@@ -426,9 +426,6 @@ swk_entry(SwkEvent *e) {
 			}
 		}
 		break;
-	default:
-		swk_label(e);
-		break;
 	case EExpose:
 		// XXX: add support for cursor (handle arrow keys)
 		swk_gi_fill(e->box->r, ColorBG, 1);
@@ -450,6 +447,9 @@ swk_entry(SwkEvent *e) {
 			Rect r = { len, e->box->r.y, 1, 1 };
 			swk_gi_fill(r, ColorFG, 2);
 		}
+		break;
+	default:
+		swk_label(e);
 		break;
 	}
 }
