@@ -11,7 +11,7 @@ GI_LIBS=-lSDL -lSDL_ttf -lSDL_image
 CFLAGS+=-DUSE_SDL
 else
 ifeq (${GI},x11)
-GI_LIBS=-lX11 -ldraw -lImlib2
+GI_LIBS=-lX11 -ldc -lImlib2
 CFLAGS+=-DUSE_X11
 endif
 endif
