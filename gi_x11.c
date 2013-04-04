@@ -7,7 +7,7 @@
 #include <X11/keysym.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-#include <draw.h>
+#include <dc.h>
 #include "swk.h"
 #define SWK
 #include "config.h"
@@ -23,15 +23,6 @@ static int col[ColorLast];
 static int colors[ColorLast] = { FGCOLOR, BGCOLOR, HICOLOR, TFCOLOR, CCCOLOR };
 #define EVENTMASK PointerMotionMask | ExposureMask | KeyPressMask | ButtonPressMask | ButtonReleaseMask
 
-static Window /* TODO: push into libdraw */
-dc_window(DC *dc, int x, int y, int w, int h) {
-	Window window;
-	window = XCreateSimpleWindow(dc->dpy, RootWindow(dc->dpy, DefaultScreen(dc->dpy)),
-		x, y, w, h, 1, col[ColorBG], col[ColorFG]);
-	XSelectInput(dc->dpy, window, EVENTMASK);
-	XMapWindow(dc->dpy, window);
-	return window;
-}
 static void dc_window_title(Window w, const char *title) {
 	XSetStandardProperties(dc->dpy, window, title, NULL, None, NULL, 0, NULL);
 }
@@ -56,6 +47,7 @@ swk_gi_init(SwkWindow *w) {
 	dc_font(dc, FONTNAME);
 	// TODO: must be dc_window(dc, x, y, w, h, bg, fg)
 	window = dc_window(dc, 10, 10, w->r.w, w->r.h);
+	XSelectInput(dc->dpy, window, EVENTMASK);
 	dc_window_title(window, w->title);
 	return swk_gi_fontsize(0);
 }
